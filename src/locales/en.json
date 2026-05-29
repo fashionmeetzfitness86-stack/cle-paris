@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "collection": "Collection",
+    "archive": "Archive",
+    "about": "About",
+    "cart": "Cart",
+    "search": "Search"
+  },
+  "home": {
+    "heroEyebrow": "2026 Campaign",
+    "heroTitle": "CLÉ PARIS",
+    "heroSubtitle": "Technical garments. Made in France.",
+    "ctaShop": "Shop the collection",
+    "ctaAddToCart": "Add to cart"
+  },
+  "product": {
+    "size": "Size",
+    "color": "Color",
+    "addToCart": "Add to cart",
+    "soldOut": "Sold out",
+    "material": "100% Organic Cotton",
+    "shipping": "Free shipping over €200"
+  },
+  "footer": {
+    "manifesto": "A technical wardrobe for those who reject the ephemeral.",
+    "rights": "All rights reserved.",
+    "legal": "Legal notice",
+    "terms": "Terms & conditions",
+    "privacy": "Privacy policy",
+    "shipping": "Shipping & returns"
+  }
+}

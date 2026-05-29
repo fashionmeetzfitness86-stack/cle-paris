@@ -8,4 +8,5 @@ build/
 .next/
 .netlify/
 .supabase/
+.scrape/
 *.log

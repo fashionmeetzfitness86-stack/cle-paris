@@ -1,0 +1,32 @@
+{
+  "nav": {
+    "collection": "Collection",
+    "archive": "Archive",
+    "about": "À Propos",
+    "cart": "Panier",
+    "search": "Rechercher"
+  },
+  "home": {
+    "heroEyebrow": "Campagne 2026",
+    "heroTitle": "CLÉ PARIS",
+    "heroSubtitle": "Vêtements techniques. Fabriqués en France.",
+    "ctaShop": "Découvrir la collection",
+    "ctaAddToCart": "Ajouter au panier"
+  },
+  "product": {
+    "size": "Taille",
+    "color": "Couleur",
+    "addToCart": "Ajouter au panier",
+    "soldOut": "Épuisé",
+    "material": "100% Coton Biologique",
+    "shipping": "Livraison gratuite dès 200€"
+  },
+  "footer": {
+    "manifesto": "Une garde-robe technique pour celles et ceux qui refusent l'éphémère.",
+    "rights": "Tous droits réservés.",
+    "legal": "Mentions légales",
+    "terms": "Conditions générales",
+    "privacy": "Politique de confidentialité",
+    "shipping": "Livraison & retours"
+  }
+}
