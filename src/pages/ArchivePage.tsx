@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { getArchivedProducts } from "../data/products";
+import { useProducts } from "../hooks/useProducts";
 
 export default function ArchivePage() {
-  const archived = getArchivedProducts();
+  const { products } = useProducts();
+  const archived = products.filter((p) => p.archived);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-24">

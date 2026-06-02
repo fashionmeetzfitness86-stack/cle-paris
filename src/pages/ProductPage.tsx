@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getProductBySlug, getActiveProducts } from "../data/products";
+import { useProduct, useProducts } from "../hooks/useProducts";
 import { useCart } from "../store/cart";
 import type { Lang, ProductVariant } from "../types";
 
@@ -9,11 +9,24 @@ export default function ProductPage() {
   const { slug = "" } = useParams();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
-  const product = getProductBySlug(slug);
+  const { product, loading } = useProduct(slug);
+  const { products: all } = useProducts();
   const add = useCart((s) => s.add);
 
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.id ?? "");
+  const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState<ProductVariant["size"] | "">("");
+
+  useEffect(() => {
+    if (product && !selectedColor) setSelectedColor(product.colors[0]?.id ?? "");
+  }, [product, selectedColor]);
+
+  if (loading && !product) {
+    return (
+      <div className="mx-auto max-w-3xl px-6 py-32 text-center text-xs uppercase tracking-widest text-stone-500">
+        Chargement…
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -35,7 +48,7 @@ export default function ProductPage() {
     add({ productSlug: product.slug, size: selectedSize, colorId: selectedColor, qty: 1 });
   };
 
-  const related = getActiveProducts().filter((p) => p.slug !== product.slug).slice(0, 3);
+  const related = all.filter((p) => !p.archived && p.slug !== product.slug).slice(0, 3);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-16">

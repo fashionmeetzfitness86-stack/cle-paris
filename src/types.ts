@@ -17,7 +17,7 @@ export type Product = {
   name: string;
   category: "hoodie" | "crewneck" | "pants" | "shorts" | "tshirt" | "accessory";
   price: number;
-  currency: "EUR";
+  currency: "EUR" | "USD";
   description: { fr: string; en: string };
   material: { fr: string; en: string };
   colors: ProductColor[];

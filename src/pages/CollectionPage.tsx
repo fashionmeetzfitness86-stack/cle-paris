@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getActiveProducts } from "../data/products";
+import { useProducts } from "../hooks/useProducts";
 import type { Lang, Product } from "../types";
 
 type Filter = "all" | "tops" | "pants" | "shorts";
@@ -25,7 +25,8 @@ export default function CollectionPage() {
   const { i18n } = useTranslation();
   const lang = i18n.language as Lang;
   const [filter, setFilter] = useState<Filter>("all");
-  const products = getActiveProducts().filter((p) => matchFilter(p, filter));
+  const { products: all, loading } = useProducts();
+  const products = all.filter((p) => !p.archived && matchFilter(p, filter));
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-24">
@@ -51,6 +52,12 @@ export default function CollectionPage() {
           </button>
         ))}
       </div>
+
+      {loading && products.length === 0 && (
+        <div className="mt-16 text-center text-xs uppercase tracking-widest text-stone-500">
+          Chargement de la collection…
+        </div>
+      )}
 
       <div className="mt-12 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((p) => {

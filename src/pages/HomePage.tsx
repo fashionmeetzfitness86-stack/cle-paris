@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getActiveProducts } from "../data/products";
+import { useProducts } from "../hooks/useProducts";
 import type { Lang } from "../types";
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
-  const products = getActiveProducts();
-  const featured = products[0];
+  const { products } = useProducts();
+  const active = products.filter((p) => !p.archived);
+  const featured = active[0];
 
   return (
     <div className="bg-black text-bone">
@@ -68,7 +69,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {products.slice(0, 3).map((p) => {
+          {active.slice(0, 3).map((p) => {
             const color = p.colors[0];
             return (
               <Link key={p.slug} to={`/product/${p.slug}`} className="group">
