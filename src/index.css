@@ -2,17 +2,257 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   html {
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
   }
+
   body {
     background-color: #0a0a0a;
     color: #e8e2d6;
   }
+
   ::selection {
     background-color: #c8b89a;
     color: #0a0a0a;
+  }
+
+  /* Refined scrollbar */
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2825; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #c8b89a40; }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────────── */
+
+/* Core entrance */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pure opacity */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Scale + fade — modals, drawers, cards */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Clip-path mask wipe — editorial text reveals */
+@keyframes revealMask {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+/* Floating product image */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px) rotate(0.3deg); }
+  50%       { transform: translateY(-14px) rotate(-0.3deg); }
+}
+
+/* Slow ambient drift — hero bg gradient */
+@keyframes gradientDrift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Marquee scroll */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  from { background-position: -400px 0; }
+  to   { background-position: 400px 0; }
+}
+
+/* Subtle light sweep on hover targets */
+@keyframes lightSweep {
+  0%   { opacity: 0; left: -60%; }
+  50%  { opacity: 0.08; }
+  100% { opacity: 0; left: 120%; }
+}
+
+/* Slide in from right (drawer) */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Slide out to right */
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+/* Slide up from bottom */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Slide down (mobile menu) */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tick — underline grow */
+@keyframes underlineGrow {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+/* Ken Burns — slow cinematic zoom on hero image/video */
+@keyframes kenBurns {
+  from { transform: scale(1.08); }
+  to   { transform: scale(1.0); }
+}
+
+/* Clip-path wipe from left — editorial headline reveal */
+@keyframes clipInLeft {
+  from { clip-path: inset(0 100% 0 0); opacity: 1; }
+  to   { clip-path: inset(0 0%   0 0); opacity: 1; }
+}
+
+/* Clip-path wipe from right */
+@keyframes clipInRight {
+  from { clip-path: inset(0 0 0 100%); opacity: 1; }
+  to   { clip-path: inset(0 0 0 0%);   opacity: 1; }
+}
+
+/* Line scale reveal — decorative dividers */
+@keyframes lineReveal {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ─── Utility classes ───────────────────────────────────────────────────────── */
+@layer utilities {
+
+  /* — Entrance animations — */
+  .animate-fade-up  { animation: fadeUp  0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-fade-in  { animation: fadeIn  0.5s ease-out both; }
+  .animate-scale-in { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-reveal   { animation: revealMask 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-slide-down { animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-slide-in-right  { animation: slideInRight  0.45s cubic-bezier(0.32, 0.72, 0, 1) both; }
+  .animate-slide-out-right { animation: slideOutRight 0.35s cubic-bezier(0.32, 0.72, 0, 1) both; }
+
+  /* — Cinematic luxury animations — */
+  .animate-ken-burns  { animation: kenBurns 10s cubic-bezier(0.4, 0, 0.2, 1) both; }
+  .animate-clip-left  { animation: clipInLeft  0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-clip-right { animation: clipInRight 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .animate-line-reveal { animation: lineReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* — Looping — */
+  .animate-float   { animation: floatY  6s ease-in-out infinite; }
+  .animate-marquee { animation: marquee 28s linear infinite; }
+  .animate-shimmer {
+    background: linear-gradient(90deg, #1a1a1a 25%, #2a2825 50%, #1a1a1a 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  /* — Delay tokens — */
+  .delay-75  { animation-delay: 75ms; }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
+  .delay-700 { animation-delay: 700ms; }
+  .delay-800 { animation-delay: 800ms; }
+
+  /* — Duration tokens — */
+  .duration-400 { animation-duration: 400ms; }
+  .duration-600 { animation-duration: 600ms; }
+  .duration-900 { animation-duration: 900ms; }
+
+  /* — GPU hints — */
+  .will-change-transform { will-change: transform; }
+  .will-change-opacity   { will-change: opacity; }
+
+  /* — Animated nav underline — */
+  .nav-link-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .nav-link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-link-underline:hover::after,
+  .nav-link-underline.active::after {
+    transform: scaleX(1);
+  }
+
+  /* — Light sweep effect — */
+  .light-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .light-sweep::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, #ffffff10, transparent);
+    transform: skewX(-20deg);
+    transition: none;
+    pointer-events: none;
+  }
+  .light-sweep:hover::before {
+    animation: lightSweep 0.7s ease-out forwards;
+  }
+
+  /* — Gradient text — */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #e8e2d6 0%, #c8b89a 50%, #e8e2d6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* — Page transition — */
+  .page-enter {
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+/* ─── Reduced motion — global override ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

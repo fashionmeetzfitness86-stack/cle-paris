@@ -19,7 +19,32 @@
     "addToCart": "Ajouter au panier",
     "soldOut": "Épuisé",
     "material": "100% Coton Biologique",
-    "shipping": "Livraison gratuite dès 200€"
+    "shipping": "Livraison gratuite dès 200€",
+    "relatedItems": "Autres pièces",
+    "notFound": "Produit introuvable",
+    "backToCollection": "← Retour à la collection"
+  },
+  "about": {
+    "eyebrow": "// Notre Manifeste",
+    "title": "L'Atelier Clé Paris",
+    "p1": "Chaque pièce est une réponse à la matière. Nous créons des formes intemporelles au tombé impeccable, alliant la rigueur de l'architecture à la douceur de textures d'exception.",
+    "p2": "Loin du rythme effréné des tendances éphémères, nos créations sont pensées pour durer et structurer l'allure. Chaque coupe est étudiée dans nos ateliers parisiens, chaque coton trié pour son grammage et sa tenue, chaque couture renforcée pour traverser les saisons.",
+    "p3": "Notre vocabulaire est clair : silhouettes architecturales, matières denses, palette restreinte. Le superflu n'a pas sa place.",
+    "conception": "Conception",
+    "production": "Production",
+    "contact": "Contact"
+  },
+  "archive": {
+    "title": "Archive",
+    "subtitle": "Pièces des saisons passées, conservées comme témoins de l'évolution du langage Clé Paris.",
+    "empty": "L'archive sera publiée à la rotation suivante.",
+    "cta": "Voir la collection actuelle →"
+  },
+  "cart": {
+    "empty": "Panier vide.",
+    "checkout": "Passer au paiement",
+    "remove": "Retirer",
+    "subtotal": "Sous-total"
   },
   "footer": {
     "manifesto": "Une garde-robe technique pour celles et ceux qui refusent l'éphémère.",
