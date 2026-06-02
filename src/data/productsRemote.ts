@@ -1,4 +1,4 @@
-import { supabase, supabaseConfigured } from "../lib/supabase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { PRODUCTS as LOCAL_PRODUCTS, getProductBySlug as getLocalBySlug } from "./products";
 import type { Product, ProductColor, ProductVariant } from "../types";
 
@@ -58,7 +58,7 @@ function rowToProduct(row: DbProduct, colorMap: Map<string, ProductColor>): Prod
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  if (!supabaseConfigured || !supabase) return LOCAL_PRODUCTS;
+  if (!isSupabaseConfigured() || !supabase) return LOCAL_PRODUCTS;
 
   try {
     const [colorMap, { data, error }] = await Promise.all([
@@ -82,7 +82,7 @@ export async function fetchProducts(): Promise<Product[]> {
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | undefined> {
-  if (!supabaseConfigured || !supabase) return getLocalBySlug(slug);
+  if (!isSupabaseConfigured() || !supabase) return getLocalBySlug(slug);
 
   try {
     const [colorMap, { data, error }] = await Promise.all([
