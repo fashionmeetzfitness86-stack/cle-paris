@@ -19,7 +19,32 @@
     "addToCart": "Add to cart",
     "soldOut": "Sold out",
     "material": "100% Organic Cotton",
-    "shipping": "Free shipping over €200"
+    "shipping": "Free shipping over €200",
+    "relatedItems": "More pieces",
+    "notFound": "Product not found",
+    "backToCollection": "← Back to collection"
+  },
+  "about": {
+    "eyebrow": "// Our Manifesto",
+    "title": "The Clé Paris Atelier",
+    "p1": "Every piece is a response to the material. We create timeless forms with impeccable drape, combining the rigour of architecture with the softness of exceptional textures.",
+    "p2": "Far from the frantic pace of fleeting trends, our creations are designed to last and structure one's silhouette. Every cut is studied in our Parisian ateliers, every cotton selected for its weight and hold, every seam reinforced to last through the seasons.",
+    "p3": "Our vocabulary is clear: architectural silhouettes, dense materials, a restrained palette. The superfluous has no place here.",
+    "conception": "Design",
+    "production": "Production",
+    "contact": "Contact"
+  },
+  "archive": {
+    "title": "Archive",
+    "subtitle": "Pieces from past seasons, preserved as witnesses to the evolution of the Clé Paris language.",
+    "empty": "The archive will be published at the next rotation.",
+    "cta": "See current collection →"
+  },
+  "cart": {
+    "empty": "Your cart is empty.",
+    "checkout": "Proceed to checkout",
+    "remove": "Remove",
+    "subtotal": "Subtotal"
   },
   "footer": {
     "manifesto": "A technical wardrobe for those who reject the ephemeral.",

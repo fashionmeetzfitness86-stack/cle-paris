@@ -1,12 +1,30 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const anon = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-export const supabaseConfigured = Boolean(url && anon);
+const PLACEHOLDER_URL = "https://placeholder.supabase.co";
 
-export const supabase = supabaseConfigured
-  ? createClient(url, anon, {
-      auth: { persistSession: false },
-    })
-  : null;
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    "[CLÉ PARIS] Supabase environment variables are not set. " +
+      "Copy .env.example to .env and fill in your credentials. " +
+      "The app will run with static/mock data until connected."
+  );
+}
+
+export const supabase = createClient(
+  supabaseUrl || PLACEHOLDER_URL,
+  supabaseAnonKey || "placeholder-anon-key"
+);
+
+/** Returns true only when real Supabase credentials are present */
+export function isSupabaseConfigured(): boolean {
+  return !!(
+    supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl !== PLACEHOLDER_URL
+  );
+}
+
+export default supabase;
