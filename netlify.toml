@@ -2,6 +2,15 @@
   command = "npm run build"
   publish = "dist"
 
+# /shop → /collection (permanent alias)
+[[redirects]]
+  from = "/shop"
+  to = "/collection"
+  status = 301
+  force = true
+
+# /cart → handled by React (opens drawer via CartRoute)
+# Netlify must serve the SPA so the JS can run CartRoute
 [[redirects]]
   from = "/*"
   to = "/index.html"

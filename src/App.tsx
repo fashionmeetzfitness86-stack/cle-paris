@@ -1,6 +1,5 @@
-import { Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
@@ -12,55 +11,50 @@ import ArchivePage from "./pages/ArchivePage";
 import LegalPage from "./pages/LegalPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AdminApp from "./admin/AdminApp";
+import { useCart } from "./store/cart";
 
-/** Wraps page content with a fade-up entrance on every route change */
-function PageTransition({ children }: { children: ReactNode }) {
-  const location = useLocation();
-  const [key, setKey] = useState(location.pathname);
-  const [animating, setAnimating] = useState(false);
+/**
+ * /cart — opens the cart drawer and redirects to /collection.
+ * No empty cart page; the drawer is the cart experience.
+ */
+function CartRoute() {
+  const navigate = useNavigate();
+  const open = useCart((s) => s.open);
 
   useEffect(() => {
-    setAnimating(true);
-    setKey(location.pathname);
-    // Remove class after animation completes so it doesn't block re-trigger
-    const t = setTimeout(() => setAnimating(false), 700);
-    return () => clearTimeout(t);
-  }, [location.pathname]);
+    open();
+    navigate("/collection", { replace: true });
+  }, [open, navigate]);
 
-  return (
-    <div
-      key={key}
-      className={animating ? "animate-fade-up will-change-transform" : ""}
-    >
-      {children}
-    </div>
-  );
+  return null;
 }
 
 export default function App() {
   return (
     <Routes>
-      {/* Admin — no storefront shell */}
+      {/* ── Admin (no storefront shell) ──────────────────────────── */}
       <Route path="/admin/*" element={<AdminApp />} />
 
-      {/* Storefront */}
+      {/* ── Storefront ───────────────────────────────────────────── */}
       <Route
         path="/*"
         element={
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
-              <PageTransition>
-                <Routes>
-                  <Route path="/"              element={<HomePage />} />
-                  <Route path="/collection"    element={<CollectionPage />} />
-                  <Route path="/product/:slug" element={<ProductPage />} />
-                  <Route path="/about"         element={<AboutPage />} />
-                  <Route path="/archive"       element={<ArchivePage />} />
-                  <Route path="/legal/:slug"   element={<LegalPage />} />
-                  <Route path="*"              element={<NotFoundPage />} />
-                </Routes>
-              </PageTransition>
+              <Routes>
+                <Route path="/"              element={<HomePage />} />
+                {/* Collection + /shop alias */}
+                <Route path="/collection"    element={<CollectionPage />} />
+                <Route path="/shop"          element={<Navigate to="/collection" replace />} />
+                {/* /cart opens drawer then lands on collection */}
+                <Route path="/cart"          element={<CartRoute />} />
+                <Route path="/product/:slug" element={<ProductPage />} />
+                <Route path="/about"         element={<AboutPage />} />
+                <Route path="/archive"       element={<ArchivePage />} />
+                <Route path="/legal/:slug"   element={<LegalPage />} />
+                <Route path="*"             element={<NotFoundPage />} />
+              </Routes>
             </main>
             <Footer />
             <CartDrawer />
