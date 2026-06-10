@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getActiveProducts } from "../data/products";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 import type { Lang, Product } from "../types";
 
 type Filter = "all" | "tops" | "pants" | "shorts";
@@ -27,12 +28,14 @@ export default function CollectionPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const products = getActiveProducts().filter((p) => matchFilter(p, filter));
 
+  const gridRef = useScrollReveal();
+
   return (
     <div className="min-h-screen bg-[#F4EFE8]">
       <div className="mx-auto max-w-7xl px-6 py-20">
 
         {/* Page header */}
-        <header className="mb-14 border-b border-black/8 pb-10">
+        <header className="mb-14 border-b border-black/8 pb-10 animate-fade-up">
           <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-[#C8A97E]">
             Ateliers CLÉ Paris
           </div>
@@ -46,13 +49,13 @@ export default function CollectionPage() {
           </div>
         </header>
 
-        {/* Filters */}
-        <div className="mb-12 flex flex-wrap gap-2">
+        {/* Filter bar */}
+        <div className="mb-12 flex flex-wrap gap-2 animate-fade-up" style={{ animationDelay: "100ms" }}>
           {FILTERS.map((f) => (
             <button
               key={f.id}
               onClick={() => setFilter(f.id)}
-              className={`border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] transition-all duration-300 ${
+              className={`border px-5 py-2.5 text-[11px] uppercase tracking-[0.18em] transition-all duration-300 btn-press ${
                 filter === f.id
                   ? "border-[#111] bg-[#111] text-[#FAF7F2]"
                   : "border-black/15 bg-transparent text-[#6F6F6F] hover:border-[#111] hover:text-[#111]"
@@ -63,19 +66,22 @@ export default function CollectionPage() {
           ))}
         </div>
 
-        {/* Product grid */}
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Product grid — scroll-reveal container */}
+        <div
+          ref={gridRef}
+          className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {products.map((p, i) => {
             const color = p.colors[0];
+            const staggerClass = `stagger-${Math.min(i + 1, 9)}` as string;
             return (
               <Link
                 key={p.slug}
                 to={`/product/${p.slug}`}
-                className="group block"
-                style={{ animationDelay: `${i * 60}ms` }}
+                className={`group block reveal ${staggerClass}`}
               >
                 {/* Image container */}
-                <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)]">
+                <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                   <img
                     src={p.images[0]}
                     alt={p.name}
@@ -122,8 +128,14 @@ export default function CollectionPage() {
 
         {/* Empty state */}
         {products.length === 0 && (
-          <div className="py-24 text-center text-[#6F6F6F]">
+          <div className="py-24 text-center text-[#6F6F6F] animate-fade-up">
             <p className="text-sm">Aucun produit dans cette catégorie.</p>
+            <button
+              onClick={() => setFilter("all")}
+              className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[#C8A97E] hover:text-[#111] transition-colors border-b border-[#C8A97E] hover:border-[#111] pb-0.5"
+            >
+              Voir tous les produits →
+            </button>
           </div>
         )}
       </div>
