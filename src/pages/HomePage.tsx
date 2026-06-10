@@ -1,7 +1,19 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getActiveProducts } from "../data/products";
+import { useScrollReveal, useRevealRef } from "../hooks/useScrollReveal";
 import type { Lang } from "../types";
+
+// ── Marquee trust bar items ──────────────────────────────────────
+const TRUST_ITEMS = [
+  "100% Coton Biologique",
+  "Confectionné en Europe",
+  "480 – 500 GSM Dense Weave",
+  "Livraison Gratuite dès 150 €",
+  "Retours sous 30 jours",
+  "Paiement 3× sans frais",
+  "Édition limitée — CLÉ 2026",
+];
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -9,28 +21,39 @@ export default function HomePage() {
   const products = getActiveProducts();
   const featured = products[0];
 
+  // Scroll-reveal refs
+  const featuredRef   = useScrollReveal();
+  const editorialRef  = useRevealRef();
+  const manifeRef     = useRevealRef();
+
   return (
     <div className="bg-[#F4EFE8] text-[#111]">
 
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 py-24 md:flex-row md:items-center md:py-36">
         {/* Left — editorial text */}
         <div className="flex-1 max-w-xl">
           <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8A97E] animate-fade-up" style={{ animationDelay: "100ms" }}>
             {t("home.heroEyebrow")} · CLÉ&nbsp;01™
           </div>
-          <h1 className="mt-5 font-display text-5xl font-light leading-[1.05] tracking-tight text-[#111] md:text-6xl lg:text-7xl animate-clip-left" style={{ animationDelay: "200ms" }}>
+          <h1
+            className="mt-5 font-display text-5xl font-light leading-[1.05] tracking-tight text-[#111] md:text-6xl lg:text-7xl animate-clip-left"
+            style={{ animationDelay: "200ms" }}
+          >
             Campagne<br />
             <em className="not-italic text-[#C8A97E]">CLÉ</em> PARIS<br />
             2026
           </h1>
-          <p className="mt-8 max-w-sm text-sm leading-relaxed text-[#6F6F6F] animate-fade-up" style={{ animationDelay: "500ms" }}>
+          <p
+            className="mt-8 max-w-sm text-sm leading-relaxed text-[#6F6F6F] animate-fade-up"
+            style={{ animationDelay: "500ms" }}
+          >
             Streetwear haut de gamme façonné par la texture. Développé et produit avec une intégrité structurelle dans nos ateliers européens.
           </p>
           <div className="mt-10 flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "650ms" }}>
             <Link
               to="/collection"
-              className="border border-[#111] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#111] hover:bg-[#111] hover:text-[#FAF7F2] transition-all duration-300 light-sweep"
+              className="border border-[#111] px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#111] hover:bg-[#111] hover:text-[#FAF7F2] transition-all duration-300 light-sweep btn-press"
             >
               {t("home.ctaShop")}
             </Link>
@@ -55,28 +78,38 @@ export default function HomePage() {
             <img
               src="/images/levitating_sweatshirt-Photoroom.png"
               alt={featured.name}
-              className="w-full max-w-lg object-contain animate-float drop-shadow-[0_24px_48px_rgba(0,0,0,0.12)]"
+              className="w-full max-w-lg object-contain animate-float drop-shadow-[0_24px_48px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-[1.03]"
             />
           </Link>
         )}
       </section>
 
-      {/* ── MARQUEE / TRUST BAR ──────────────────────────────────────────── */}
-      <div className="border-y border-black/8 bg-[#EFE7DD]">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-2 px-6 py-4 text-[10px] uppercase tracking-[0.25em] text-[#6F6F6F]">
-          <span>100% Coton Biologique</span>
-          <span className="text-[#C8A97E]">·</span>
-          <span>Confectionné en Europe</span>
-          <span className="text-[#C8A97E]">·</span>
-          <span>480 – 500 GSM Dense Weave</span>
-          <span className="text-[#C8A97E]">·</span>
-          <span>Livraison Gratuite dès 150 €</span>
+      {/* ── MARQUEE TRUST BAR ──────────────────────────────────────── */}
+      <div className="border-y border-black/8 bg-[#EFE7DD] overflow-hidden">
+        <div
+          className="flex animate-marquee py-4 text-[10px] uppercase tracking-[0.25em] text-[#6F6F6F] select-none"
+          aria-hidden="true"
+        >
+          {/* Duplicated for seamless loop */}
+          {[0, 1].map((copy) => (
+            <span key={copy} className="flex flex-shrink-0 items-center gap-0">
+              {TRUST_ITEMS.map((item, i) => (
+                <span key={i} className="flex items-center gap-0">
+                  <span className="px-8 whitespace-nowrap">{item}</span>
+                  <span className="text-[#C8A97E] pr-2">·</span>
+                </span>
+              ))}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* ── FEATURED PRODUCTS ────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        <div className="mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      {/* ── FEATURED PRODUCTS ─────────────────────────────────────── */}
+      <section
+        ref={featuredRef}
+        className="mx-auto max-w-7xl px-6 py-24"
+      >
+        <div className="mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between reveal">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8A97E]">
               Ateliers CLÉ Paris
@@ -87,7 +120,7 @@ export default function HomePage() {
           </div>
           <Link
             to="/collection"
-            className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#111] hover:text-[#C8A97E] transition-colors duration-300 border-b border-transparent hover:border-[#C8A97E] pb-0.5"
+            className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#C8A97E] transition-colors duration-300 border-b border-transparent hover:border-[#C8A97E] pb-0.5"
           >
             Voir tous les modèles →
           </Link>
@@ -96,16 +129,14 @@ export default function HomePage() {
         <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {products.slice(0, 3).map((p, i) => {
             const color = p.colors[0];
+            const stagger = ["stagger-1", "stagger-2", "stagger-3"][i];
             return (
               <Link
                 key={p.slug}
                 to={`/product/${p.slug}`}
-                className="group block"
+                className={`group block reveal ${stagger}`}
               >
-                <div
-                  className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-shadow duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]"
-                  style={{ transitionDelay: `${i * 60}ms` }}
-                >
+                <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-shadow duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                   <img
                     src={p.images[0]}
                     alt={p.name}
@@ -141,9 +172,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── EDITORIAL STRIP — Texture & Architecture ─────────────────────── */}
-      <section className="bg-[#EFE7DD]">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2 md:items-center">
+      {/* ── EDITORIAL STRIP ─────────────────────────────────────────── */}
+      <section
+        className="bg-[#EFE7DD]"
+      >
+        <div
+          ref={editorialRef as React.RefObject<HTMLDivElement>}
+          className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2 md:items-center reveal"
+        >
           <div className="overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.08)]">
             <img
               src="/images/sweat2_flat.jpg"
@@ -182,9 +218,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── MANIFESTE ───────────────────────────────────────────────────── */}
+      {/* ── MANIFESTE ──────────────────────────────────────────────── */}
       <section className="bg-[#E7DDD1]">
-        <div className="mx-auto max-w-3xl px-6 py-24 text-center">
+        <div
+          ref={manifeRef as React.RefObject<HTMLDivElement>}
+          className="mx-auto max-w-3xl px-6 py-24 text-center reveal"
+        >
           <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8A97E]">
             // Notre Manifeste
           </div>
@@ -199,7 +238,7 @@ export default function HomePage() {
           </p>
           <Link
             to="/collection"
-            className="mt-10 inline-block border border-[#111] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#111] hover:bg-[#111] hover:text-[#FAF7F2] transition-all duration-300 light-sweep"
+            className="mt-10 inline-block border border-[#111] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#111] hover:bg-[#111] hover:text-[#FAF7F2] transition-all duration-300 light-sweep btn-press"
           >
             Découvrir la collection
           </Link>

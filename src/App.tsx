@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import type { ReactNode } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
@@ -29,6 +30,20 @@ function CartRoute() {
   return null;
 }
 
+/**
+ * Smooth fade-up entrance on every route change.
+ * key on location.pathname causes React to remount the div,
+ * triggering the .page-enter animation afresh.
+ */
+function PageTransition({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="page-enter">
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Routes>
@@ -42,19 +57,21 @@ export default function App() {
           <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-1">
-              <Routes>
-                <Route path="/"              element={<HomePage />} />
-                {/* Collection + /shop alias */}
-                <Route path="/collection"    element={<CollectionPage />} />
-                <Route path="/shop"          element={<Navigate to="/collection" replace />} />
-                {/* /cart opens drawer then lands on collection */}
-                <Route path="/cart"          element={<CartRoute />} />
-                <Route path="/product/:slug" element={<ProductPage />} />
-                <Route path="/about"         element={<AboutPage />} />
-                <Route path="/archive"       element={<ArchivePage />} />
-                <Route path="/legal/:slug"   element={<LegalPage />} />
-                <Route path="*"             element={<NotFoundPage />} />
-              </Routes>
+              <PageTransition>
+                <Routes>
+                  <Route path="/"              element={<HomePage />} />
+                  {/* Collection + /shop alias */}
+                  <Route path="/collection"    element={<CollectionPage />} />
+                  <Route path="/shop"          element={<Navigate to="/collection" replace />} />
+                  {/* /cart opens drawer then lands on collection */}
+                  <Route path="/cart"          element={<CartRoute />} />
+                  <Route path="/product/:slug" element={<ProductPage />} />
+                  <Route path="/about"         element={<AboutPage />} />
+                  <Route path="/archive"       element={<ArchivePage />} />
+                  <Route path="/legal/:slug"   element={<LegalPage />} />
+                  <Route path="*"              element={<NotFoundPage />} />
+                </Routes>
+              </PageTransition>
             </main>
             <Footer />
             <CartDrawer />
