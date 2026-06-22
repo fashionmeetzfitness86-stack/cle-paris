@@ -10,9 +10,11 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4">
         {/* Brand column */}
         <div className="md:col-span-2">
-          <div className="font-display text-xl tracking-[0.45em] text-[#FAF7F2]">
-            CLÉ&nbsp;PARIS
-          </div>
+          <img
+            src="/images/cle-logo-white.png"
+            alt="CLÉ PARIS"
+            className="h-10 w-auto"
+          />
           <p className="mt-6 max-w-md text-sm leading-relaxed text-[#A89D92]">
             {t("footer.manifesto")}
           </p>
@@ -26,15 +28,7 @@ export default function Footer() {
               Instagram
             </a>
             <a
-              href="https://x.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[#7A706A] hover:text-[#C8A97E] transition-colors duration-300"
-            >
-              X / Twitter
-            </a>
-            <a
-              href="mailto:contact@cleparis.store"
+              href="mailto:Clepariscollection@gmail.com"
               className="text-[#7A706A] hover:text-[#C8A97E] transition-colors duration-300"
             >
               Email

@@ -16,8 +16,11 @@ import {
   insertProductMedia,
   deleteProductMedia,
 } from '../services/products';
+import { uploadMedia } from '../services/media';
+import { listCategories } from '../services/categories';
+import { listCollections } from '../services/collections';
 import { mockProducts, mockCategories, mockCollections, mockColors, mockVariants, mockProductMedia } from '../mockData';
-import type { Product, ProductColor, ProductMedia } from '../types';
+import type { Product, ProductColor, ProductMedia, Category, Collection } from '../types';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -31,6 +34,11 @@ function generateSlug(name: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
+
+// Local-only ids for colors/media added before the product is saved.
+let tmpCounter = 0;
+const tmpId = () => `tmp-${Date.now()}-${tmpCounter++}`;
+const isTempId = (v: string) => v.startsWith('tmp-');
 
 export default function ProductEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -80,10 +88,17 @@ export default function ProductEditPage() {
   });
   const [newColor, setNewColor] = useState({ label_fr: '', label_en: '', hex: '#1a1a1a', slug: '' });
   const [newMediaUrl, setNewMediaUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  // Real categories/collections from the DB (mock as dev fallback).
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
+  const [collections, setCollections] = useState<Collection[]>(mockCollections);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  // Track DB rows removed in the editor so we can delete them on save.
+  const [removedColorIds, setRemovedColorIds] = useState<string[]>([]);
+  const [removedMediaIds, setRemovedMediaIds] = useState<string[]>([]);
 
   const loadProduct = useCallback(async () => {
     if (isNew || !id || !isSupabaseConfigured()) return;
@@ -104,29 +119,40 @@ export default function ProductEditPage() {
 
   useEffect(() => { void loadProduct(); }, [loadProduct]);
 
+  // Load real categories + collections so the dropdown ids match the DB.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    void listCategories().then(({ data }) => { if (data) setCategories(data); });
+    void listCollections().then(({ data }) => { if (data) setCollections(data); });
+  }, []);
+
   const handleNameChange = (name: string) => {
     setForm((f) => ({ ...f, name, slug: generateSlug(name) }));
     setHasChanges(true);
   };
 
-  const handleAddColor = async () => {
+  const handleAddColor = () => {
     if (!newColor.label_fr) return;
-    const colorPayload: Omit<ProductColor, 'id'> = {
-      product_id: id ?? 'new',
-      ...newColor,
+    // Add locally with a temp id; persisted on Save (works for new products too).
+    const color: ProductColor = {
+      id: tmpId(),
+      product_id: isNew ? '' : (id ?? ''),
       slug: generateSlug(newColor.label_fr),
+      label_fr: newColor.label_fr,
+      label_en: newColor.label_en,
+      hex: newColor.hex,
     };
-    const { data, error: err } = await upsertProductColor(colorPayload);
-    if (err || !data) return;
-    setColors((c) => [...c, data]);
-    setStockMap((s) => ({ ...s, [data.id]: Object.fromEntries(SIZES.map((sz) => [sz, 0])) }));
+    setColors((c) => [...c, color]);
+    setStockMap((s) => ({ ...s, [color.id]: Object.fromEntries(SIZES.map((sz) => [sz, 0])) }));
     setNewColor({ label_fr: '', label_en: '', hex: '#1a1a1a', slug: '' });
+    setHasChanges(true);
   };
 
-  const handleRemoveColor = async (colorId: string) => {
-    await deleteProductColor(colorId);
+  const handleRemoveColor = (colorId: string) => {
+    if (!isTempId(colorId)) setRemovedColorIds((r) => [...r, colorId]);
     setColors((c) => c.filter((col) => col.id !== colorId));
     setStockMap((s) => { const next = { ...s }; delete next[colorId]; return next; });
+    setHasChanges(true);
   };
 
   const handleStockChange = (colorId: string, size: string, value: number) => {
@@ -134,43 +160,120 @@ export default function ProductEditPage() {
     setHasChanges(true);
   };
 
-  const handleAddMedia = async () => {
+  const handleAddMedia = () => {
     if (!newMediaUrl.trim()) return;
-    const payload: Omit<ProductMedia, 'id'> = {
-      product_id: id ?? 'new',
+    // Add locally; persisted on Save.
+    const item: ProductMedia = {
+      id: tmpId(),
+      product_id: isNew ? '' : (id ?? ''),
       url: newMediaUrl.trim(),
       alt: form.name,
       type: 'image',
       sort_order: media.length + 1,
     };
-    const { data } = await insertProductMedia(payload);
-    if (data) setMedia((m) => [...m, data]);
+    setMedia((m) => [...m, item]);
     setNewMediaUrl('');
+    setHasChanges(true);
   };
 
-  const handleRemoveMedia = async (mediaId: string) => {
-    await deleteProductMedia(mediaId);
+  const handleRemoveMedia = (mediaId: string) => {
+    if (!isTempId(mediaId)) setRemovedMediaIds((r) => [...r, mediaId]);
     setMedia((m) => m.filter((item) => item.id !== mediaId));
+    setHasChanges(true);
+  };
+
+  const handleUploadFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    setError(null);
+    try {
+      for (const file of Array.from(files)) {
+        const { url, error: upErr } = await uploadMedia(file, 'products');
+        if (upErr || !url) { setError(upErr?.message ?? 'Échec du téléversement.'); continue; }
+        setMedia((m) => [
+          ...m,
+          { id: tmpId(), product_id: isNew ? '' : (id ?? ''), url, alt: form.name, type: 'image', sort_order: m.length + 1 },
+        ]);
+      }
+      setHasChanges(true);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
     setSaving(true);
     setError(null);
+
+    // 1. Create/update the product FIRST so we have its real id.
     const payload = isNew ? form : { ...form, id };
-    const { error: err } = await upsertProduct(payload);
+    const { data: savedProduct, error: err } = await upsertProduct(payload);
+    if (err || !savedProduct) {
+      setError(err?.message ?? 'Échec de l’enregistrement du produit.');
+      setSaving(false);
+      return;
+    }
+    const productId = savedProduct.id;
 
-    if (err) { setError(err.message); setSaving(false); return; }
+    try {
+      // 2. Delete colors removed in the editor (cascades their variants).
+      for (const cid of removedColorIds) await deleteProductColor(cid);
 
-    // Save variants
-    for (const color of colors) {
-      const variants = SIZES.map((size) => ({
-        product_id: id ?? 'new',
-        color_id: color.id,
-        size,
-        stock: stockMap[color.id]?.[size] ?? 0,
-        sku: `CLP-${color.slug.toUpperCase()}-${size}`,
-      }));
-      await replaceProductVariants(id ?? 'new', color.id, variants);
+      // 3. Persist colors. Insert temp ones (→ real id), update existing.
+      const colorIdMap: Record<string, string> = {};
+      for (const color of colors) {
+        const base = {
+          product_id: productId,
+          slug: color.slug || generateSlug(color.label_fr),
+          label_fr: color.label_fr,
+          label_en: color.label_en,
+          hex: color.hex,
+        };
+        if (isTempId(color.id)) {
+          const { data, error: cErr } = await upsertProductColor(base);
+          if (cErr || !data) throw new Error(cErr?.message ?? 'Échec de l’enregistrement d’une couleur.');
+          colorIdMap[color.id] = data.id;
+        } else {
+          const { error: cErr } = await upsertProductColor({ id: color.id, ...base });
+          if (cErr) throw new Error(cErr.message);
+          colorIdMap[color.id] = color.id;
+        }
+      }
+
+      // 4. Variants per color (using the REAL color id).
+      for (const color of colors) {
+        const dbColorId = colorIdMap[color.id];
+        const variants = SIZES.map((size) => ({
+          product_id: productId,
+          color_id: dbColorId,
+          size,
+          stock: stockMap[color.id]?.[size] ?? 0,
+          sku: `CLP-${(color.slug || color.label_fr).toUpperCase()}-${size}`,
+        }));
+        const { error: vErr } = await replaceProductVariants(productId, dbColorId, variants);
+        if (vErr) throw new Error(vErr.message);
+      }
+
+      // 5. Media: delete removed, insert newly added (in display order).
+      for (const mid of removedMediaIds) await deleteProductMedia(mid);
+      let order = 1;
+      for (const item of media) {
+        if (isTempId(item.id)) {
+          const { error: mErr } = await insertProductMedia({
+            product_id: productId,
+            url: item.url,
+            alt: item.alt || form.name,
+            type: item.type ?? 'image',
+            sort_order: order,
+          });
+          if (mErr) throw new Error(mErr.message);
+        }
+        order++;
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Échec de l’enregistrement des détails du produit.');
+      setSaving(false);
+      return;
     }
 
     setSaving(false);
@@ -218,14 +321,14 @@ export default function ProductEditPage() {
               onChange={(e) => { setForm((f) => ({ ...f, category_id: (e.target as HTMLSelectElement).value || null })); setHasChanges(true); }}
             >
               <option value="">— Sans catégorie —</option>
-              {mockCategories.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
+              {categories.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
             </FormField>
             <FormField as="select" id="prod-collection" label="Collection"
               value={form.collection_id ?? ''}
               onChange={(e) => { setForm((f) => ({ ...f, collection_id: (e.target as HTMLSelectElement).value || null })); setHasChanges(true); }}
             >
               <option value="">— Sans collection —</option>
-              {mockCollections.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
+              {collections.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
             </FormField>
           </div>
         </section>
@@ -375,8 +478,21 @@ export default function ProductEditPage() {
               </div>
             ))}
           </div>
+          {/* Upload depuis l'ordinateur */}
+          <label className={`flex items-center justify-center gap-2 border border-dashed border-[#262626] rounded py-4 text-xs transition-colors cursor-pointer ${uploading ? 'opacity-60 cursor-wait' : 'text-[#a8a29e] hover:border-[#c8b89a] hover:text-[#e8e2d6]'}`}>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={uploading}
+              onChange={(e) => { void handleUploadFiles(e.target.files); e.target.value = ''; }}
+              className="hidden"
+            />
+            {uploading ? 'Téléversement…' : '⤓ Téléverser des images depuis l’ordinateur'}
+          </label>
+          {/* Ou coller une URL */}
           <div className="flex gap-2">
-            <input type="url" placeholder="https://… URL de l'image" value={newMediaUrl}
+            <input type="url" placeholder="… ou coller une URL d'image" value={newMediaUrl}
               onChange={(e) => setNewMediaUrl(e.target.value)}
               className="flex-1 bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm px-3 py-2 placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors"
             />

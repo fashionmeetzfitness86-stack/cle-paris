@@ -76,7 +76,7 @@ BEGIN
       ('a0000000-0000-0000-0000-000000000002'::uuid, 'c0000000-0000-0000-0000-000000000002'::uuid, ARRAY['S','M','L','XL'], 10),
       ('a0000000-0000-0000-0000-000000000003'::uuid, 'c0000000-0000-0000-0000-000000000003'::uuid, ARRAY['S','M','L','XL'], 8),
       ('a0000000-0000-0000-0000-000000000004'::uuid, 'c0000000-0000-0000-0000-000000000004'::uuid, ARRAY['S','M','L'],      14)
-    ) AS t(product_id uuid, color_id uuid, sizes text[], stock int)
+    ) AS t(product_id, color_id, sizes, stock)
   LOOP
     FOREACH s IN ARRAY rec.sizes LOOP
       INSERT INTO public.product_variants (product_id, color_id, size, stock)

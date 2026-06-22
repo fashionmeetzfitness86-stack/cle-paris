@@ -32,10 +32,10 @@ export default function AboutPage() {
           <div>
             <div className="text-[#6F6F6F]">{t("about.contact")}</div>
             <a
-              href="mailto:contact@cleparis.store"
+              href="mailto:Clepariscollection@gmail.com"
               className="mt-2 block font-medium text-[#111] hover:text-[#C8A97E] transition-colors duration-300"
             >
-              contact@cleparis.store
+              Clepariscollection@gmail.com
             </a>
           </div>
         </div>

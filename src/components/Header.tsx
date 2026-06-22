@@ -52,12 +52,17 @@ export default function Header() {
             </NavLink>
           </nav>
 
-          {/* Wordmark — centered */}
+          {/* Wordmark — centered logo */}
           <Link
             to="/"
-            className="font-display text-base tracking-[0.45em] text-[#111] hover:text-[#C8A97E] transition-colors duration-300"
+            aria-label="CLÉ PARIS"
+            className="transition-opacity duration-300 hover:opacity-70"
           >
-            CLÉ&nbsp;PARIS
+            <img
+              src="/images/cle-logo.png"
+              alt="CLÉ PARIS"
+              className="h-7 w-auto md:h-8"
+            />
           </Link>
 
           {/* Right controls */}

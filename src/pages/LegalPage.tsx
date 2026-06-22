@@ -9,8 +9,8 @@ const STATIC_LEGAL: Record<string, { title: { fr: string; en: string }; body: { 
   mentions: {
     title: { fr: "Mentions légales", en: "Legal Notice" },
     body: {
-      fr: `Le site cle-paris.com est édité par CLÉ PARIS, marque indépendante.\nPour toute question d'ordre légal, contacter contact@cleparis.store.\n\nHébergement : Netlify.\nDirectrice de la publication : à compléter.`,
-      en: `The cle-paris.com website is published by CLÉ PARIS, an independent brand.\nFor any legal questions, contact contact@cleparis.store.\n\nHosting: Netlify.`,
+      fr: `Le site cle-paris.com est édité par CLÉ PARIS, marque indépendante.\nPour toute question d'ordre légal, contacter Clepariscollection@gmail.com.\n\nHébergement : Netlify.\nDirectrice de la publication : à compléter.`,
+      en: `The cle-paris.com website is published by CLÉ PARIS, an independent brand.\nFor any legal questions, contact Clepariscollection@gmail.com.\n\nHosting: Netlify.`,
     },
   },
   conditions: {
