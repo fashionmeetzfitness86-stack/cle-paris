@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isMockMode } from '../../lib/supabase';
 import { signIn } from '../lib/auth';
 import { updateLastLogin } from '../services/adminUsers';
 
@@ -25,8 +25,9 @@ export default function AdminLoginPage() {
 
     setLoading(true);
 
-    if (!isSupabaseConfigured()) {
-      // Mock mode — accept any credentials
+    if (isMockMode()) {
+      // Dev-only mock mode — accept any credentials.
+      // Never reachable in a production build (see isMockMode).
       await new Promise((r) => setTimeout(r, 600));
       localStorage.setItem('cle-admin-auth', 'true');
       localStorage.setItem('cle-admin-email', email);
@@ -83,7 +84,7 @@ export default function AdminLoginPage() {
           <h2 className="text-[#e8e2d6] font-display font-semibold text-lg mb-1">Connexion</h2>
           <p className="text-[#57534e] text-sm mb-6">Accès réservé aux administrateurs</p>
 
-          {!isSupabaseConfigured() && (
+          {isMockMode() && (
             <div className="mb-4 rounded border border-[#c8b89a]/20 bg-[#c8b89a]/5 px-3 py-2 text-[10px] text-[#c8b89a] uppercase tracking-widest">
               Mode développement — Supabase non connecté
             </div>
@@ -142,7 +143,7 @@ export default function AdminLoginPage() {
           </form>
         </div>
 
-        {!isSupabaseConfigured() && (
+        {isMockMode() && (
           <p className="text-center mt-6 text-[10px] text-[#57534e]">
             Mode dev — Entrez n'importe quel e-mail et mot de passe.
           </p>

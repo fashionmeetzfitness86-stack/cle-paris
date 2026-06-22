@@ -1,11 +1,31 @@
-import { Fragment, useState } from 'react';
-import { mockCustomers } from '../mockData';
+import { Fragment, useState, useEffect } from 'react';
+import { listCustomers } from '../services/customers';
+import ErrorBanner from '../components/ErrorBanner';
+import LoadingSpinner from '../components/LoadingSpinner';
 import type { Customer } from '../types';
 
 export default function CustomersPage() {
-  const [customers] = useState<Customer[]>(mockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load real customers from Supabase.
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    listCustomers()
+      .then(({ data, error: err }) => {
+        if (!alive) return;
+        if (err) setError(err.message);
+        else setCustomers(data ?? []);
+      })
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const filtered = customers.filter((c) => {
     if (!search) return true;
@@ -25,6 +45,8 @@ export default function CustomersPage() {
         <p className="text-sm text-[#57534e] mt-0.5">{customers.length} clients inscrits</p>
       </div>
 
+      {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+
       <div className="relative max-w-sm">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#57534e]" viewBox="0 0 16 16" fill="currentColor">
           <circle cx="7" cy="7" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -40,7 +62,9 @@ export default function CustomersPage() {
       </div>
 
       <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg overflow-hidden">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="px-5 py-12"><LoadingSpinner /></div>
+        ) : filtered.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <p className="text-[#57534e] text-sm">Aucun client trouvé</p>
           </div>

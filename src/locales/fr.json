@@ -8,21 +8,72 @@
   },
   "home": {
     "heroEyebrow": "Campagne 2026",
-    "heroTitle": "CLÉ PARIS",
-    "heroSubtitle": "Vêtements techniques. Fabriqués en France.",
+    "heroCampaign": "Campagne",
+    "heroSubtitle": "Confectionné en Europe.",
+    "heroBody": "Streetwear haut de gamme façonné par la texture. Développé et produit avec une intégrité structurelle dans nos ateliers européens.",
+    "discoverCle": "Découvrir CLÉ 01™ →",
     "ctaShop": "Découvrir la collection",
-    "ctaAddToCart": "Ajouter au panier"
+    "ctaAddToCart": "Ajouter au panier",
+    "atelierEyebrow": "Ateliers CLÉ Paris",
+    "latestCollection": "Dernière collection",
+    "viewAll": "Voir tous les modèles →",
+    "new": "Nouveau",
+    "designParis": "Conception Paris",
+    "editorialTitle1": "Drapé & silhouette",
+    "editorialTitle2": "architecturaux",
+    "editorialBody": "Développé dans nos ateliers parisiens pour garantir un tombé structurel parfait sans compromis. Chaque couture est pensée comme une ligne architecturale.",
+    "labelMaking": "Fabrication",
+    "valueMaking": "Ateliers Europe",
+    "labelMaterial": "Matière",
+    "valueMaterial": "480–500 GSM Cotton",
+    "readMore": "Lire la fiche →",
+    "manifestoEyebrow": "// Notre Manifeste",
+    "manifestoTitle": "L'Atelier Clé Paris",
+    "manifestoBody": "Chaque pièce est une réponse à la matière. Nous créons des formes intemporelles au tombé impeccable, alliant la rigueur de l'architecture à la douceur de textures d'exception. Loin du rythme effréné des tendances éphémères, nos créations sont pensées pour durer et structurer l'allure."
+  },
+  "trust": {
+    "organicCotton": "100% Coton Biologique",
+    "madeInEurope": "Confectionné en Europe",
+    "denseWeave": "480 – 500 GSM Dense Weave",
+    "freeShipping": "Livraison Gratuite dès 150 €",
+    "returns": "Retours sous 30 jours",
+    "installments": "Paiement 3× sans frais",
+    "limitedEdition": "Édition limitée — CLÉ 2026"
+  },
+  "collection": {
+    "eyebrow": "Ateliers CLÉ Paris",
+    "title": "La Collection",
+    "itemsFound": "Créations Trouvées",
+    "filterAll": "Tous",
+    "filterTops": "Hauts",
+    "filterPants": "Pantalons",
+    "filterShorts": "Shorts",
+    "viewProduct": "Voir le produit →",
+    "empty": "Aucun produit dans cette catégorie.",
+    "viewAll": "Voir tous les produits →"
   },
   "product": {
+    "eyebrow": "CLÉ PARIS · 2026",
     "size": "Taille",
     "color": "Couleur",
+    "sizeGuide": "Guide des tailles",
     "addToCart": "Ajouter au panier",
+    "added": "✓ Ajouté au panier",
+    "addedShort": "✓ Ajouté",
+    "chooseSize": "Choisir une taille",
+    "selectSize": "Sélectionnez une taille",
     "soldOut": "Épuisé",
     "material": "100% Coton Biologique",
-    "shipping": "Livraison gratuite dès 200€",
+    "shipping": "Livraison gratuite dès 150€",
+    "shippingBody": "Livraison standard 3–5 jours. Express 24h disponible. Retours acceptés sous 30 jours, état neuf.",
+    "composition": "Composition",
+    "compositionBody": "100% Coton Biologique — 480 GSM Dense Weave. Fabriqué dans nos ateliers européens certifiés.",
+    "care": "Entretien",
+    "careBody": "Lavage à 30°C. Ne pas repasser. Ne pas sécher en machine.",
     "relatedItems": "Autres pièces",
     "notFound": "Produit introuvable",
-    "backToCollection": "← Retour à la collection"
+    "backToCollection": "← Retour à la collection",
+    "loading": "Chargement…"
   },
   "about": {
     "eyebrow": "// Notre Manifeste",
@@ -31,20 +82,35 @@
     "p2": "Loin du rythme effréné des tendances éphémères, nos créations sont pensées pour durer et structurer l'allure. Chaque coupe est étudiée dans nos ateliers parisiens, chaque coton trié pour son grammage et sa tenue, chaque couture renforcée pour traverser les saisons.",
     "p3": "Notre vocabulaire est clair : silhouettes architecturales, matières denses, palette restreinte. Le superflu n'a pas sa place.",
     "conception": "Conception",
+    "conceptionValue": "Paris",
     "production": "Production",
+    "productionValue": "Portugal & Europe",
     "contact": "Contact"
   },
   "archive": {
+    "eyebrow": "CLÉ Paris",
     "title": "Archive",
     "subtitle": "Pièces des saisons passées, conservées comme témoins de l'évolution du langage Clé Paris.",
     "empty": "L'archive sera publiée à la rotation suivante.",
-    "cta": "Voir la collection actuelle →"
+    "cta": "Voir la collection actuelle →",
+    "badge": "Archive"
   },
   "cart": {
-    "empty": "Panier vide.",
+    "empty": "Votre panier est vide.",
+    "continue": "Continuer les achats →",
     "checkout": "Passer au paiement",
+    "redirecting": "Redirection…",
     "remove": "Retirer",
-    "subtotal": "Sous-total"
+    "subtotal": "Sous-total",
+    "freeShipping": "Livraison gratuite à partir de 150 €",
+    "decrease": "Diminuer",
+    "increase": "Augmenter",
+    "close": "Fermer le panier"
+  },
+  "order": {
+    "title": "Merci pour votre commande",
+    "body": "Votre paiement a été confirmé. Un e-mail de confirmation vous a été envoyé. Nous préparons votre commande avec soin.",
+    "continue": "Retour à la collection"
   },
   "footer": {
     "manifesto": "Une garde-robe technique pour celles et ceux qui refusent l'éphémère.",
@@ -53,5 +119,10 @@
     "terms": "Conditions générales",
     "privacy": "Politique de confidentialité",
     "shipping": "Livraison & retours"
+  },
+  "common": {
+    "back": "Retour",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Passer en Français"
   }
 }

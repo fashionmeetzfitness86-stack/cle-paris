@@ -7,7 +7,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { onAuthStateChange } from "../lib/auth";
-import { isSupabaseConfigured } from "../../lib/supabase";
+import { isSupabaseConfigured, isMockMode } from "../../lib/supabase";
 import type { AdminUser } from "../types";
 import supabase from "../../lib/supabase";
 
@@ -30,8 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch the admin_users row for the current auth user
   const loadAdminUser = async (userId: string) => {
-    if (!isSupabaseConfigured()) {
-      // Mock admin user when Supabase is not configured
+    if (isMockMode()) {
+      // Dev-only mock admin user (never in production)
       setAdminUser({
         id: "mock-admin-id",
         email: "admin@cleparis.store",
@@ -52,8 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
-      // In dev/mock mode: check localStorage for mock auth
-      const isMockAuth = localStorage.getItem("cle-admin-auth") === "true";
+      // Dev-only mock mode: check localStorage for mock auth.
+      // In production isMockMode() is false, so we never grant mock access.
+      const isMockAuth = isMockMode() && localStorage.getItem("cle-admin-auth") === "true";
       if (isMockAuth) {
         loadAdminUser("mock-user-id");
       }

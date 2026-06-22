@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getProductBySlug, getActiveProducts } from "../data/products";
+import { useProduct, useProducts } from "../hooks/useProducts";
 import { useCart } from "../store/cart";
 import type { Lang, ProductVariant } from "../types";
 
@@ -39,31 +39,49 @@ export default function ProductPage() {
   const { slug = "" } = useParams();
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
-  const product = getProductBySlug(slug);
+  const { product, loading } = useProduct(slug);
+  const { products: activeProducts } = useProducts();
   const add = useCart((s) => s.add);
 
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0]?.id ?? "");
+  const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState<ProductVariant["size"] | "">("");
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
   // Track which image "key" to force re-render for fade animation
   const [imgKey, setImgKey] = useState(0);
 
+  // Default to the product's first color once it loads (async).
+  useEffect(() => {
+    if (product?.colors[0]?.id) setSelectedColor(product.colors[0].id);
+  }, [product]);
+
   // Reset selected size when color changes
   useEffect(() => {
     setSelectedSize("");
   }, [selectedColor]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F4EFE8]">
+        <div className="mx-auto max-w-3xl px-6 py-32 text-center">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] animate-pulse">
+            {lang === "fr" ? "Chargement…" : "Loading…"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen bg-[#F4EFE8]">
         <div className="mx-auto max-w-3xl px-6 py-32 text-center animate-fade-up">
-          <h1 className="font-display text-3xl text-[#111]">Produit introuvable</h1>
+          <h1 className="font-display text-3xl text-[#111]">{t("product.notFound")}</h1>
           <Link
             to="/collection"
             className="mt-6 inline-block text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#111] transition-colors"
           >
-            ← Retour à la collection
+            {t("product.backToCollection")}
           </Link>
         </div>
       </div>
@@ -93,7 +111,7 @@ export default function ProductPage() {
     if (e.key === "ArrowLeft")  handleImageChange(Math.max(idx - 1, 0));
   };
 
-  const related = getActiveProducts().filter((p) => p.slug !== product.slug).slice(0, 3);
+  const related = activeProducts.filter((p) => p.slug !== product.slug).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-[#F4EFE8] pb-24 md:pb-0">
@@ -163,7 +181,7 @@ export default function ProductPage() {
           {/* ── Product details ────────────────────────────────────── */}
           <div className="md:sticky md:top-24 md:self-start animate-fade-up" style={{ animationDelay: "150ms" }}>
             <div className="text-[11px] uppercase tracking-[0.25em] text-[#C8A97E]">
-              CLÉ&nbsp;PARIS · 2026
+              {t("product.eyebrow")}
             </div>
             <h1 className="mt-3 font-display text-3xl font-light tracking-tight text-[#111] md:text-4xl">
               {product.name}
@@ -210,7 +228,7 @@ export default function ProductPage() {
                   {t("product.size")}
                 </div>
                 <button className="text-[11px] text-[#C8A97E] underline underline-offset-2 hover:text-[#111] transition-colors">
-                  Guide des tailles
+                  {t("product.sizeGuide")}
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -246,21 +264,19 @@ export default function ProductPage() {
                   : "bg-[#111] text-[#FAF7F2] hover:bg-[#2C2825]"
               }`}
             >
-              {added ? "✓ Ajouté au panier" : t("product.addToCart")}
+              {added ? t("product.added") : t("product.addToCart")}
             </button>
 
             {/* Product details accordions */}
             <div className="mt-8 space-y-0">
               <Accordion label={t("product.shipping")}>
-                Livraison standard 3–5 jours. Express 24h disponible.<br />
-                Retours acceptés sous 30 jours, état neuf.
+                {t("product.shippingBody")}
               </Accordion>
-              <Accordion label={product.material[lang] ?? "Composition"}>
-                100% Coton Biologique — 480 GSM Dense Weave.<br />
-                Fabriqué dans nos ateliers européens certifiés.
+              <Accordion label={product.material[lang] || t("product.composition")}>
+                {t("product.compositionBody")}
               </Accordion>
-              <Accordion label="Entretien">
-                Lavage à 30°C. Ne pas repasser. Ne pas sécher en machine.
+              <Accordion label={t("product.care")}>
+                {t("product.careBody")}
               </Accordion>
             </div>
           </div>
@@ -270,7 +286,7 @@ export default function ProductPage() {
         {related.length > 0 && (
           <div className="mt-32 border-t border-black/8 pt-16">
             <h2 className="font-display text-2xl font-light tracking-tight text-[#111] animate-fade-up">
-              Autres pièces
+              {t("product.relatedItems")}
             </h2>
             <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
@@ -306,7 +322,7 @@ export default function ProductPage() {
           {/* Size hint if not selected */}
           {!selectedSize && (
             <p className="flex-1 text-[11px] text-[#6F6F6F] uppercase tracking-wider truncate">
-              Sélectionnez une taille
+              {t("product.selectSize")}
             </p>
           )}
           <button
@@ -318,7 +334,7 @@ export default function ProductPage() {
                 : "bg-[#111] text-[#FAF7F2]"
             }`}
           >
-            {added ? "✓ Ajouté" : !selectedSize ? "Choisir une taille" : t("product.addToCart")}
+            {added ? t("product.addedShort") : !selectedSize ? t("product.chooseSize") : t("product.addToCart")}
           </button>
         </div>
       </div>

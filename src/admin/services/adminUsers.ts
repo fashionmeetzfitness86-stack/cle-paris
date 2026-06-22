@@ -62,3 +62,36 @@ export async function updateLastLogin(authUserId: string): Promise<void> {
     .update({ last_login: new Date().toISOString() })
     .eq("auth_user_id", authUserId);
 }
+
+/**
+ * Invite a NEW admin: creates a real Supabase Auth login (server-side
+ * via the admin-invite function) and links the admin_users row. The
+ * browser cannot do this directly because it needs the service-role key.
+ */
+export async function inviteAdmin(input: {
+  email: string;
+  name: string;
+  role: "admin" | "editor";
+}): Promise<{ error: { message: string } | null }> {
+  if (!isSupabaseConfigured()) {
+    return { error: null }; // dev/mock: no-op
+  }
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) return { error: { message: "Session expirée. Reconnectez-vous." } };
+
+  const res = await fetch("/.netlify/functions/admin-invite", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    return { error: { message: data.error || "Échec de l'invitation." } };
+  }
+  await logActivity("create", "admin_user", undefined, { email: input.email, role: input.role });
+  return { error: null };
+}

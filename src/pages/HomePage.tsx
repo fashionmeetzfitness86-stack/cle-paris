@@ -1,25 +1,26 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getActiveProducts } from "../data/products";
+import { useProducts } from "../hooks/useProducts";
 import { useScrollReveal, useRevealRef } from "../hooks/useScrollReveal";
 import type { Lang } from "../types";
 
-// ── Marquee trust bar items ──────────────────────────────────────
-const TRUST_ITEMS = [
-  "100% Coton Biologique",
-  "Confectionné en Europe",
-  "480 – 500 GSM Dense Weave",
-  "Livraison Gratuite dès 150 €",
-  "Retours sous 30 jours",
-  "Paiement 3× sans frais",
-  "Édition limitée — CLÉ 2026",
+// ── Marquee trust bar items (i18n keys) ──────────────────────────
+const TRUST_KEYS = [
+  "trust.organicCotton",
+  "trust.madeInEurope",
+  "trust.denseWeave",
+  "trust.freeShipping",
+  "trust.returns",
+  "trust.installments",
+  "trust.limitedEdition",
 ];
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
-  const products = getActiveProducts();
+  const { products } = useProducts();
   const featured = products[0];
+  const TRUST_ITEMS = TRUST_KEYS.map((k) => t(k));
 
   // Scroll-reveal refs
   const featuredRef   = useScrollReveal();
@@ -40,7 +41,7 @@ export default function HomePage() {
             className="mt-5 font-display text-5xl font-light leading-[1.05] tracking-tight text-[#111] md:text-6xl lg:text-7xl animate-clip-left"
             style={{ animationDelay: "200ms" }}
           >
-            Campagne<br />
+            {t("home.heroCampaign")}<br />
             <em className="not-italic text-[#C8A97E]">CLÉ</em> PARIS<br />
             2026
           </h1>
@@ -48,7 +49,7 @@ export default function HomePage() {
             className="mt-8 max-w-sm text-sm leading-relaxed text-[#6F6F6F] animate-fade-up"
             style={{ animationDelay: "500ms" }}
           >
-            Streetwear haut de gamme façonné par la texture. Développé et produit avec une intégrité structurelle dans nos ateliers européens.
+            {t("home.heroBody")}
           </p>
           <div className="mt-10 flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "650ms" }}>
             <Link
@@ -62,7 +63,7 @@ export default function HomePage() {
                 to={`/product/${featured.slug}`}
                 className="px-7 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#111] transition-colors duration-300 border border-transparent hover:border-black/10"
               >
-                Découvrir CLÉ 01™ →
+                {t("home.discoverCle")}
               </Link>
             )}
           </div>
@@ -112,17 +113,17 @@ export default function HomePage() {
         <div className="mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between reveal">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8A97E]">
-              Ateliers CLÉ Paris
+              {t("home.atelierEyebrow")}
             </div>
             <h2 className="mt-2 font-display text-3xl font-light tracking-tight text-[#111] md:text-4xl">
-              Dernière collection
+              {t("home.latestCollection")}
             </h2>
           </div>
           <Link
             to="/collection"
             className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#C8A97E] transition-colors duration-300 border-b border-transparent hover:border-[#C8A97E] pb-0.5"
           >
-            Voir tous les modèles →
+            {t("home.viewAll")}
           </Link>
         </div>
 
@@ -150,7 +151,7 @@ export default function HomePage() {
                     />
                   )}
                   <span className="absolute left-3 top-3 bg-[#C8A97E] px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-white">
-                    {lang === "fr" ? "Nouveau" : "New"}
+                    {t("home.new")}
                   </span>
                 </div>
                 <div className="mt-4 flex items-start justify-between gap-2">
@@ -159,7 +160,7 @@ export default function HomePage() {
                       {p.name}
                     </div>
                     <div className="mt-0.5 text-[11px] uppercase tracking-wider text-[#6F6F6F]">
-                      {color.label[lang]}
+                      {color?.label[lang]}
                     </div>
                   </div>
                   <div className="text-sm font-medium text-[#3A3A3A] whitespace-nowrap">
@@ -189,30 +190,30 @@ export default function HomePage() {
           </div>
           <div className="md:pl-8">
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8A97E]">
-              Conception Paris
+              {t("home.designParis")}
             </div>
             <h3 className="mt-4 font-display text-3xl font-light tracking-tight text-[#111] md:text-4xl">
-              Drapé &amp; silhouette<br />
-              <em className="not-italic text-[#C8A97E]">architecturaux</em>
+              {t("home.editorialTitle1")}<br />
+              <em className="not-italic text-[#C8A97E]">{t("home.editorialTitle2")}</em>
             </h3>
             <p className="mt-6 max-w-md text-sm leading-relaxed text-[#6F6F6F]">
-              Développé dans nos ateliers parisiens pour garantir un tombé structurel parfait sans compromis. Chaque couture est pensée comme une ligne architecturale.
+              {t("home.editorialBody")}
             </p>
             <div className="mt-8 flex flex-wrap gap-8">
               <div>
-                <div className="text-[9px] uppercase tracking-[0.25em] text-[#6F6F6F]">Fabrication</div>
-                <div className="mt-1 text-sm font-medium text-[#111]">Ateliers Europe</div>
+                <div className="text-[9px] uppercase tracking-[0.25em] text-[#6F6F6F]">{t("home.labelMaking")}</div>
+                <div className="mt-1 text-sm font-medium text-[#111]">{t("home.valueMaking")}</div>
               </div>
               <div>
-                <div className="text-[9px] uppercase tracking-[0.25em] text-[#6F6F6F]">Matière</div>
-                <div className="mt-1 text-sm font-medium text-[#111]">480–500 GSM Cotton</div>
+                <div className="text-[9px] uppercase tracking-[0.25em] text-[#6F6F6F]">{t("home.labelMaterial")}</div>
+                <div className="mt-1 text-sm font-medium text-[#111]">{t("home.valueMaterial")}</div>
               </div>
             </div>
             <Link
               to="/about"
               className="mt-8 inline-block border-b border-[#C8A97E] pb-1 text-[11px] uppercase tracking-[0.2em] text-[#C8A97E] hover:text-[#111] hover:border-[#111] transition-all duration-300"
             >
-              Lire la fiche →
+              {t("home.readMore")}
             </Link>
           </div>
         </div>
@@ -225,22 +226,20 @@ export default function HomePage() {
           className="mx-auto max-w-3xl px-6 py-24 text-center reveal"
         >
           <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8A97E]">
-            // Notre Manifeste
+            {t("home.manifestoEyebrow")}
           </div>
           <h3 className="mt-6 font-display text-3xl font-light tracking-tight text-[#111] md:text-4xl">
-            L'Atelier Clé Paris
+            {t("home.manifestoTitle")}
           </h3>
           <div className="mx-auto mt-4 h-px w-12 bg-[#C8A97E]" />
           <p className="mt-8 text-sm leading-relaxed text-[#6F6F6F]">
-            Chaque pièce est une réponse à la matière. Nous créons des formes intemporelles au tombé impeccable,
-            alliant la rigueur de l'architecture à la douceur de textures d'exception. Loin du rythme effréné des
-            tendances éphémères, nos créations sont pensées pour durer et structurer l'allure.
+            {t("home.manifestoBody")}
           </p>
           <Link
             to="/collection"
             className="mt-10 inline-block border border-[#111] px-8 py-3.5 text-[11px] uppercase tracking-[0.2em] text-[#111] hover:bg-[#111] hover:text-[#FAF7F2] transition-all duration-300 light-sweep btn-press"
           >
-            Découvrir la collection
+            {t("home.ctaShop")}
           </Link>
         </div>
       </section>

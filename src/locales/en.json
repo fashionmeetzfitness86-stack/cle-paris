@@ -8,21 +8,72 @@
   },
   "home": {
     "heroEyebrow": "2026 Campaign",
-    "heroTitle": "CLÉ PARIS",
-    "heroSubtitle": "Technical garments. Made in France.",
+    "heroCampaign": "Campaign",
+    "heroSubtitle": "Crafted in Europe.",
+    "heroBody": "High-end streetwear shaped by texture. Developed and produced with structural integrity in our European ateliers.",
+    "discoverCle": "Discover CLÉ 01™ →",
     "ctaShop": "Shop the collection",
-    "ctaAddToCart": "Add to cart"
+    "ctaAddToCart": "Add to cart",
+    "atelierEyebrow": "CLÉ Paris Ateliers",
+    "latestCollection": "Latest collection",
+    "viewAll": "View all pieces →",
+    "new": "New",
+    "designParis": "Designed in Paris",
+    "editorialTitle1": "Architectural drape",
+    "editorialTitle2": "& silhouette",
+    "editorialBody": "Developed in our Parisian ateliers to guarantee a perfect structural drape with no compromise. Every seam is conceived as an architectural line.",
+    "labelMaking": "Manufacturing",
+    "valueMaking": "European Ateliers",
+    "labelMaterial": "Material",
+    "valueMaterial": "480–500 GSM Cotton",
+    "readMore": "Read more →",
+    "manifestoEyebrow": "// Our Manifesto",
+    "manifestoTitle": "The Clé Paris Atelier",
+    "manifestoBody": "Every piece is a response to the material. We create timeless forms with impeccable drape, combining the rigour of architecture with the softness of exceptional textures. Far from the frantic pace of fleeting trends, our creations are designed to last and structure one's silhouette."
+  },
+  "trust": {
+    "organicCotton": "100% Organic Cotton",
+    "madeInEurope": "Crafted in Europe",
+    "denseWeave": "480 – 500 GSM Dense Weave",
+    "freeShipping": "Free Shipping over €150",
+    "returns": "30-Day Returns",
+    "installments": "Pay in 3, no fees",
+    "limitedEdition": "Limited Edition — CLÉ 2026"
+  },
+  "collection": {
+    "eyebrow": "CLÉ Paris Ateliers",
+    "title": "The Collection",
+    "itemsFound": "Items Found",
+    "filterAll": "All",
+    "filterTops": "Tops",
+    "filterPants": "Pants",
+    "filterShorts": "Shorts",
+    "viewProduct": "View product →",
+    "empty": "No products in this category.",
+    "viewAll": "See all products →"
   },
   "product": {
+    "eyebrow": "CLÉ PARIS · 2026",
     "size": "Size",
     "color": "Color",
+    "sizeGuide": "Size guide",
     "addToCart": "Add to cart",
+    "added": "✓ Added to cart",
+    "addedShort": "✓ Added",
+    "chooseSize": "Choose a size",
+    "selectSize": "Select a size",
     "soldOut": "Sold out",
     "material": "100% Organic Cotton",
-    "shipping": "Free shipping over €200",
+    "shipping": "Free shipping over €150",
+    "shippingBody": "Standard shipping 3–5 days. 24h express available. Returns accepted within 30 days, as new.",
+    "composition": "Composition",
+    "compositionBody": "100% Organic Cotton — 480 GSM Dense Weave. Made in our certified European ateliers.",
+    "care": "Care",
+    "careBody": "Wash at 30°C. Do not iron. Do not tumble dry.",
     "relatedItems": "More pieces",
     "notFound": "Product not found",
-    "backToCollection": "← Back to collection"
+    "backToCollection": "← Back to collection",
+    "loading": "Loading…"
   },
   "about": {
     "eyebrow": "// Our Manifesto",
@@ -31,20 +82,35 @@
     "p2": "Far from the frantic pace of fleeting trends, our creations are designed to last and structure one's silhouette. Every cut is studied in our Parisian ateliers, every cotton selected for its weight and hold, every seam reinforced to last through the seasons.",
     "p3": "Our vocabulary is clear: architectural silhouettes, dense materials, a restrained palette. The superfluous has no place here.",
     "conception": "Design",
+    "conceptionValue": "Paris",
     "production": "Production",
+    "productionValue": "Portugal & Europe",
     "contact": "Contact"
   },
   "archive": {
+    "eyebrow": "CLÉ Paris",
     "title": "Archive",
     "subtitle": "Pieces from past seasons, preserved as witnesses to the evolution of the Clé Paris language.",
     "empty": "The archive will be published at the next rotation.",
-    "cta": "See current collection →"
+    "cta": "See current collection →",
+    "badge": "Archive"
   },
   "cart": {
     "empty": "Your cart is empty.",
+    "continue": "Continue shopping →",
     "checkout": "Proceed to checkout",
+    "redirecting": "Redirecting…",
     "remove": "Remove",
-    "subtotal": "Subtotal"
+    "subtotal": "Subtotal",
+    "freeShipping": "Free shipping over €150",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "close": "Close cart"
+  },
+  "order": {
+    "title": "Thank you for your order",
+    "body": "Your payment has been confirmed. A confirmation email is on its way. We are preparing your order with care.",
+    "continue": "Back to the collection"
   },
   "footer": {
     "manifesto": "A technical wardrobe for those who reject the ephemeral.",
@@ -53,5 +119,10 @@
     "terms": "Terms & conditions",
     "privacy": "Privacy policy",
     "shipping": "Shipping & returns"
+  },
+  "common": {
+    "back": "Back",
+    "switchToEnglish": "Switch to English",
+    "switchToFrench": "Passer en Français"
   }
 }

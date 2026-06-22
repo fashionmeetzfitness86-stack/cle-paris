@@ -64,10 +64,12 @@ export default function Header() {
           <div className="flex items-center gap-5">
             <button
               onClick={switchLang}
-              className="hidden text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] hover:text-[#111] transition-colors duration-300 md:block"
-              aria-label="Toggle language"
+              className="hidden text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F] transition-colors duration-300 md:block"
+              aria-label={i18n.language === "fr" ? t("common.switchToEnglish") : t("common.switchToFrench")}
             >
-              {i18n.language === "fr" ? "FR · EN" : "FR · EN"}
+              <span className={i18n.language === "fr" ? "text-[#111]" : "hover:text-[#111]"}>FR</span>
+              <span className="px-1 text-[#C8A97E]">·</span>
+              <span className={i18n.language === "en" ? "text-[#111]" : "hover:text-[#111]"}>EN</span>
             </button>
             <button
               onClick={toggle}
@@ -131,7 +133,7 @@ export default function Header() {
             onClick={() => { switchLang(); setMenuOpen(false); }}
             className="text-left text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]"
           >
-            {i18n.language === "fr" ? "Switch to English" : "Passer en Français"}
+            {i18n.language === "fr" ? t("common.switchToEnglish") : t("common.switchToFrench")}
           </button>
         </nav>
       </div>

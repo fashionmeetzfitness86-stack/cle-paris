@@ -27,4 +27,15 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
+/**
+ * Mock mode = no Supabase AND a local dev build.
+ * SECURITY: never true in a production build, so the credential-less
+ * admin bypass can never ship. If a prod deploy is missing its env
+ * vars, the admin simply cannot log in (fails closed) instead of
+ * granting full access to anyone.
+ */
+export function isMockMode(): boolean {
+  return !isSupabaseConfigured() && import.meta.env.DEV;
+}
+
 export default supabase;

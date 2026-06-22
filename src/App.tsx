@@ -10,6 +10,7 @@ import ProductPage from "./pages/ProductPage";
 import AboutPage from "./pages/AboutPage";
 import ArchivePage from "./pages/ArchivePage";
 import LegalPage from "./pages/LegalPage";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AdminApp from "./admin/AdminApp";
 import { useCart } from "./store/cart";
@@ -68,6 +69,7 @@ export default function App() {
                   <Route path="/product/:slug" element={<ProductPage />} />
                   <Route path="/about"         element={<AboutPage />} />
                   <Route path="/archive"       element={<ArchivePage />} />
+                  <Route path="/order/success" element={<OrderSuccessPage />} />
                   <Route path="/legal/:slug"   element={<LegalPage />} />
                   <Route path="*"              element={<NotFoundPage />} />
                 </Routes>

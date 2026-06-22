@@ -22,7 +22,7 @@ import LegalEditorPage from './pages/LegalEditorPage';
 import I18nEditorPage from './pages/I18nEditorPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isSupabaseConfigured, isMockMode } from '../lib/supabase';
 
 // ─── Auth guard ───────────────────────────────────────────────
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -40,8 +40,9 @@ function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
 
-  // In mock mode (no Supabase), fall back to localStorage
-  const isMockAuth = !isSupabaseConfigured() && localStorage.getItem('cle-admin-auth') === 'true';
+  // In dev-only mock mode, fall back to localStorage.
+  // In production this is always false (isMockMode), so auth requires a real session.
+  const isMockAuth = isMockMode() && localStorage.getItem('cle-admin-auth') === 'true';
   const isAuthed = isSupabaseConfigured() ? !!session : isMockAuth;
 
   if (!isAuthed) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../store/cart";
-import { getProductBySlug } from "../data/products";
+import { useProductMap } from "../hooks/useProducts";
+import { startCheckout } from "../lib/checkout";
 import { useTranslation } from "react-i18next";
 import type { Lang } from "../types";
 
@@ -8,6 +9,24 @@ export default function CartDrawer() {
   const { items, isOpen, close, remove, updateQty } = useCart();
   const { i18n, t } = useTranslation();
   const lang = i18n.language as Lang;
+  const { map: productMap } = useProductMap();
+  const getProductBySlug = (slug: string) => productMap.get(slug);
+
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+
+  const handleCheckout = async () => {
+    if (items.length === 0 || checkingOut) return;
+    setCheckoutError("");
+    setCheckingOut(true);
+    try {
+      await startCheckout(items);
+      // On success the browser redirects to Stripe; no further code runs.
+    } catch (e) {
+      setCheckoutError(e instanceof Error ? e.message : String(e));
+      setCheckingOut(false);
+    }
+  };
 
   // ── Animated mount/unmount cycle ───────────────────────────────
   // Keep mounted during close animation so it can slide out.
@@ -77,12 +96,12 @@ export default function CartDrawer() {
           {items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
               <div className="text-3xl opacity-20 select-none">◻</div>
-              <p className="text-sm text-[#6F6F6F]">Votre panier est vide.</p>
+              <p className="text-sm text-[#6F6F6F]">{t("cart.empty")}</p>
               <button
                 onClick={close}
                 className="mt-2 text-[11px] uppercase tracking-[0.2em] text-[#C8A97E] hover:text-[#111] transition-colors border-b border-[#C8A97E] hover:border-[#111] pb-0.5"
               >
-                Continuer les achats →
+                {t("cart.continue")}
               </button>
             </div>
           )}
@@ -129,7 +148,7 @@ export default function CartDrawer() {
                         onClick={() => remove(item.productSlug, item.size, item.colorId)}
                         className="ml-auto text-[11px] uppercase tracking-wide text-[#6F6F6F] hover:text-[#111] transition-colors"
                       >
-                        Retirer
+                        {t("cart.remove")}
                       </button>
                     </div>
                   </div>
@@ -145,19 +164,25 @@ export default function CartDrawer() {
         {/* Footer */}
         <div className="border-t border-black/8 bg-[#F4EFE8] px-6 py-6">
           <div className="flex justify-between items-baseline">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">Sous-total</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">{t("cart.subtotal")}</span>
             <span className="text-base font-medium text-[#111] tabular-nums">
               €{subtotal.toFixed(2)}
             </span>
           </div>
           <button
-            disabled={items.length === 0}
+            onClick={handleCheckout}
+            disabled={items.length === 0 || checkingOut}
             className="mt-5 w-full bg-[#111] py-4 text-[11px] uppercase tracking-[0.2em] text-[#FAF7F2] transition-all duration-300 hover:bg-[#2C2825] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed light-sweep"
           >
-            Passer au paiement
+            {checkingOut ? t("cart.redirecting") : t("cart.checkout")}
           </button>
+          {checkoutError && (
+            <p className="mt-3 text-center text-[10px] text-[#b4402f] tracking-wide">
+              {checkoutError}
+            </p>
+          )}
           <p className="mt-3 text-center text-[10px] text-[#6F6F6F] tracking-wide">
-            Livraison gratuite à partir de 150&thinsp;€
+            {t("cart.freeShipping")}
           </p>
         </div>
       </aside>

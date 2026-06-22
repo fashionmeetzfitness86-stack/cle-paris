@@ -3,29 +3,28 @@ import { Link } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorBanner from '../components/ErrorBanner';
 import { listOrders, countOrders, revenueThisMonth } from '../services/orders';
 import { countCustomers } from '../services/customers';
 import { listActivity } from '../services/activity';
 import type { ActivityEntry } from '../services/activity';
 import { listProducts } from '../services/products';
-import { mockOrders } from '../mockData';
 import type { Order } from '../types';
 
 export default function DashboardPage() {
-  const [recentOrders, setRecentOrders] = useState<Order[]>(mockOrders.slice(0, 5));
+  // Start empty/zero — never seed real-looking numbers from mock data.
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
-  const [orderCount, setOrderCount] = useState<number>(mockOrders.length);
-  const [revenue, setRevenue] = useState<number>(
-    mockOrders
-      .filter((o) => o.status !== 'cancelled' && o.status !== 'refunded')
-      .reduce((s, o) => s + o.total, 0)
-  );
-  const [productCount, setProductCount] = useState<number>(4);
-  const [customerCount, setCustomerCount] = useState<number>(8);
-  const [loading, setLoading] = useState(false);
+  const [orderCount, setOrderCount] = useState<number>(0);
+  const [revenue, setRevenue] = useState<number>(0);
+  const [productCount, setProductCount] = useState<number>(0);
+  const [customerCount, setCustomerCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [ordersRes, productsRes, orders5Res] = await Promise.all([
         countOrders(),
@@ -44,8 +43,9 @@ export default function DashboardPage() {
       setRevenue(rev);
       setCustomerCount(custCount);
       setActivity(actEntries);
-    } catch {
-      // silently fall back to mock data already in state
+    } catch (e) {
+      // Surface the failure instead of masking it with believable fake KPIs.
+      setError(e instanceof Error ? e.message : 'Impossible de charger les statistiques.');
     } finally {
       setLoading(false);
     }
@@ -63,6 +63,7 @@ export default function DashboardPage() {
         <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Dashboard</h2>
       </div>
 
+      {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
       {loading && <LoadingSpinner />}
 
       {/* Stat cards */}

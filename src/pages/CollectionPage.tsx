@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getActiveProducts } from "../data/products";
+import { useProducts } from "../hooks/useProducts";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import type { Lang, Product } from "../types";
 
 type Filter = "all" | "tops" | "pants" | "shorts";
 
-const FILTERS: { id: Filter; label: { fr: string; en: string } }[] = [
-  { id: "all",    label: { fr: "Tous",      en: "All"    } },
-  { id: "tops",   label: { fr: "Hauts",     en: "Tops"   } },
-  { id: "pants",  label: { fr: "Pantalons", en: "Pants"  } },
-  { id: "shorts", label: { fr: "Shorts",    en: "Shorts" } },
+const FILTERS: { id: Filter; key: string }[] = [
+  { id: "all",    key: "collection.filterAll"    },
+  { id: "tops",   key: "collection.filterTops"   },
+  { id: "pants",  key: "collection.filterPants"  },
+  { id: "shorts", key: "collection.filterShorts" },
 ];
 
 const matchFilter = (p: Product, f: Filter) => {
@@ -23,10 +23,11 @@ const matchFilter = (p: Product, f: Filter) => {
 };
 
 export default function CollectionPage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
   const [filter, setFilter] = useState<Filter>("all");
-  const products = getActiveProducts().filter((p) => matchFilter(p, filter));
+  const { products: allProducts } = useProducts();
+  const products = allProducts.filter((p) => matchFilter(p, filter));
 
   const gridRef = useScrollReveal();
 
@@ -37,14 +38,14 @@ export default function CollectionPage() {
         {/* Page header */}
         <header className="mb-14 border-b border-black/8 pb-10 animate-fade-up">
           <div className="mb-3 text-[11px] uppercase tracking-[0.25em] text-[#C8A97E]">
-            Ateliers CLÉ Paris
+            {t("collection.eyebrow")}
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <h1 className="font-display text-4xl font-light tracking-tight text-[#111] md:text-5xl">
-              La Collection&nbsp;<em className="font-light not-italic text-[#C8A97E]">2026</em>
+              {t("collection.title")}&nbsp;<em className="font-light not-italic text-[#C8A97E]">2026</em>
             </h1>
             <div className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">
-              [{products.length} {lang === "fr" ? "Créations Trouvées" : "Items Found"}]
+              [{products.length} {t("collection.itemsFound")}]
             </div>
           </div>
         </header>
@@ -61,7 +62,7 @@ export default function CollectionPage() {
                   : "border-black/15 bg-transparent text-[#6F6F6F] hover:border-[#111] hover:text-[#111]"
               }`}
             >
-              {f.label[lang]}
+              {t(f.key)}
             </button>
           ))}
         </div>
@@ -97,12 +98,12 @@ export default function CollectionPage() {
                   )}
                   {/* New badge */}
                   <span className="absolute left-3 top-3 bg-[#C8A97E] px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-white font-medium">
-                    {lang === "fr" ? "Nouveau" : "New"}
+                    {t("home.new")}
                   </span>
                   {/* Quick-view hover overlay */}
                   <div className="absolute inset-x-0 bottom-0 translate-y-full bg-[#FAF7F2]/95 backdrop-blur-sm px-4 py-3 transition-transform duration-300 group-hover:translate-y-0 border-t border-black/8">
                     <span className="block text-center text-[10px] uppercase tracking-[0.2em] text-[#3A3A3A]">
-                      Voir le produit →
+                      {t("collection.viewProduct")}
                     </span>
                   </div>
                 </div>
@@ -114,7 +115,7 @@ export default function CollectionPage() {
                       {p.name}
                     </div>
                     <div className="mt-1 text-[11px] uppercase tracking-wider text-[#6F6F6F]">
-                      {color.label[lang]}
+                      {color?.label[lang]}
                     </div>
                   </div>
                   <div className="text-sm font-medium text-[#111] whitespace-nowrap">
@@ -129,12 +130,12 @@ export default function CollectionPage() {
         {/* Empty state */}
         {products.length === 0 && (
           <div className="py-24 text-center text-[#6F6F6F] animate-fade-up">
-            <p className="text-sm">Aucun produit dans cette catégorie.</p>
+            <p className="text-sm">{t("collection.empty")}</p>
             <button
               onClick={() => setFilter("all")}
               className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[#C8A97E] hover:text-[#111] transition-colors border-b border-[#C8A97E] hover:border-[#111] pb-0.5"
             >
-              Voir tous les produits →
+              {t("collection.viewAll")}
             </button>
           </div>
         )}

@@ -5,8 +5,7 @@ import EmptyState from '../components/EmptyState';
 import Pagination from '../components/Pagination';
 import ConfirmModal from '../components/ConfirmModal';
 import Badge from '../components/Badge';
-import { listAdminUsers, upsertAdminUser, deleteAdminUser } from '../services/adminUsers';
-import { mockAdminUsers } from '../mockData';
+import { listAdminUsers, upsertAdminUser, deleteAdminUser, inviteAdmin } from '../services/adminUsers';
 import type { AdminUser } from '../types';
 
 const PAGE_SIZE = 20;
@@ -19,9 +18,9 @@ interface FormState {
 }
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<AdminUser[]>(mockAdminUsers);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -42,7 +41,10 @@ export default function AdminUsersPage() {
   const handleSave = async () => {
     if (!form) return;
     setSaving(true);
-    const { error: err } = await upsertAdminUser(form);
+    // New admins go through invite (creates an auth login); edits update the row.
+    const { error: err } = form.id
+      ? await upsertAdminUser(form)
+      : await inviteAdmin({ email: form.email, name: form.name, role: form.role });
     if (err) setError(err.message);
     else { setForm(null); void load(); }
     setSaving(false);

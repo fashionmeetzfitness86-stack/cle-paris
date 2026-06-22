@@ -30,8 +30,8 @@ const STATIC_LEGAL: Record<string, { title: { fr: string; en: string }; body: { 
   livraison: {
     title: { fr: "Livraisons & retours", en: "Shipping & Returns" },
     body: {
-      fr: `Livraison gratuite à partir de 200 € en France métropolitaine.\nExpéditions sous 48 h ouvrées, suivi inclus.\nRetours acceptés dans les 14 jours suivant réception, frais à la charge du client.\nLes articles doivent être retournés non portés, dans leur emballage d'origine.`,
-      en: `Free shipping from €200 in metropolitan France.\nShipped within 48 working hours, tracking included.\nReturns accepted within 14 days of receipt, return shipping costs are the customer's responsibility.\nItems must be returned unworn, in their original packaging.`,
+      fr: `Livraison gratuite à partir de 150 € en France métropolitaine.\nExpéditions sous 48 h ouvrées, suivi inclus.\nRetours acceptés dans les 30 jours suivant réception, frais à la charge du client.\nLes articles doivent être retournés non portés, dans leur emballage d'origine.`,
+      en: `Free shipping from €150 in metropolitan France.\nShipped within 48 working hours, tracking included.\nReturns accepted within 30 days of receipt, return shipping costs are the customer's responsibility.\nItems must be returned unworn, in their original packaging.`,
     },
   },
 };
@@ -46,7 +46,7 @@ const SLUG_MAP: Record<string, string> = {
 
 export default function LegalPage() {
   const { slug = "mentions" } = useParams();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
 
   const staticPage = STATIC_LEGAL[slug] ?? STATIC_LEGAL.mentions;
@@ -76,7 +76,7 @@ export default function LegalPage() {
         className="group inline-flex items-center gap-2 text-xs uppercase tracking-widest text-stone-600 hover:text-bone transition-colors duration-300 mb-10"
       >
         <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span>
-        Retour
+        {t("common.back")}
       </Link>
 
       <div className="h-px bg-gradient-to-r from-stone-800 to-transparent mb-10 animate-fade-up delay-75" />
