@@ -20,7 +20,7 @@ export default function Footer() {
           </p>
           <div className="mt-8 flex gap-5 text-[10px] uppercase tracking-[0.2em]">
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/cleparis.collection"
               target="_blank"
               rel="noreferrer"
               className="text-[#7A706A] hover:text-[#C8A97E] transition-colors duration-300"
