@@ -11,14 +11,6 @@ $fr$ÉDITEUR DU SITE
 Le site cle-paris.com est édité par CLÉ PARIS, marque indépendante de prêt-à-porter.
 Contact : Clepariscollection@gmail.com
 
-Responsable de la publication : [nom du responsable]
-Forme juridique : [micro-entreprise / société — à compléter]
-SIRET : [numéro SIRET]
-Adresse : [adresse de l'éditeur]
-
-HÉBERGEMENT
-Le site est hébergé par Netlify, Inc., 512 2nd Street, Suite 200, San Francisco, CA 94107, États-Unis — netlify.com.
-
 PROPRIÉTÉ INTELLECTUELLE
 L'ensemble des contenus du site (textes, visuels, logo, créations et photographies) est la propriété exclusive de CLÉ PARIS et est protégé par le droit de la propriété intellectuelle. Toute reproduction ou utilisation, totale ou partielle, sans autorisation écrite préalable est interdite.
 
@@ -27,14 +19,6 @@ Pour toute question, écrivez-nous à Clepariscollection@gmail.com.$fr$,
 $en$SITE PUBLISHER
 The cle-paris.com website is published by CLÉ PARIS, an independent ready-to-wear brand.
 Contact: Clepariscollection@gmail.com
-
-Publication manager: [manager name]
-Legal status: [sole trader / company — to complete]
-Registration no.: [registration number]
-Address: [publisher address]
-
-HOSTING
-The site is hosted by Netlify, Inc., 512 2nd Street, Suite 200, San Francisco, CA 94107, USA — netlify.com.
 
 INTELLECTUAL PROPERTY
 All content on this site (text, visuals, logo, designs and photographs) is the exclusive property of CLÉ PARIS and is protected by intellectual property law. Any reproduction or use, in whole or in part, without prior written consent is prohibited.
