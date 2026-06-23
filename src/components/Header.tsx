@@ -38,7 +38,7 @@ export default function Header() {
             : "bg-[#F4EFE8]/80 backdrop-blur-sm border-b border-black/5"
         }`}
       >
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-2 min-h-[72px] md:min-h-[100px]">
           {/* Left nav */}
           <nav className="hidden items-center gap-8 md:flex">
             <NavLink to="/collection" className={navClass}>
