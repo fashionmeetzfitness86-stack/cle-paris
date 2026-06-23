@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -15,12 +16,13 @@ export default function ConfirmModal({
   isOpen,
   title,
   message,
-  confirmLabel = 'Confirmer',
-  cancelLabel = 'Annuler',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
   danger = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation('admin');
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -66,7 +68,7 @@ export default function ConfirmModal({
             onClick={onCancel}
             className="px-4 py-2 text-sm text-[#a8a29e] border border-[#262626] rounded hover:border-[#57534e] hover:text-[#e8e2d6] transition-colors duration-200"
           >
-            {cancelLabel}
+            {cancelLabel ?? t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -76,7 +78,7 @@ export default function ConfirmModal({
                 : 'bg-[#c8b89a]/10 text-[#c8b89a] border border-[#c8b89a]/20 hover:bg-[#c8b89a]/20'
             }`}
           >
-            {confirmLabel}
+            {confirmLabel ?? t('common.confirm')}
           </button>
         </div>
       </div>

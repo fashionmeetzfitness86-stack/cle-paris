@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Badge from '../components/Badge';
 import ConfirmModal from '../components/ConfirmModal';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -13,6 +14,7 @@ import type { Product } from '../types';
 const PAGE_SIZE = 20;
 
 export default function ProductsPage() {
+  const { t } = useTranslation('admin');
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [total, setTotal] = useState<number>(mockProducts.length);
   const [search, setSearch] = useState('');
@@ -25,8 +27,8 @@ export default function ProductsPage() {
 
   // Debounce search input
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const loadProducts = useCallback(async () => {
@@ -48,11 +50,11 @@ export default function ProductsPage() {
         setTotal(filtered.length < PAGE_SIZE ? page * PAGE_SIZE + filtered.length : page * PAGE_SIZE + PAGE_SIZE + 1);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, filter]);
+  }, [page, debouncedSearch, filter, t]);
 
   useEffect(() => {
     setPage(0);
@@ -70,7 +72,7 @@ export default function ProductsPage() {
       setDeleteTarget(null);
       await loadProducts();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression');
+      setError(e instanceof Error ? e.message : t('common.deleteError'));
       setDeleteTarget(null);
     }
   };
@@ -80,9 +82,9 @@ export default function ProductsPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Boutique</p>
-          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Produits</h2>
-          <p className="text-sm text-[#57534e] mt-0.5">{total} produit{total !== 1 ? 's' : ''} au total</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('products.overline')}</p>
+          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('products.title')}</h2>
+          <p className="text-sm text-[#57534e] mt-0.5">{t('products.total', { count: total })}</p>
         </div>
         <Link
           to="/admin/products/new"
@@ -92,7 +94,7 @@ export default function ProductsPage() {
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Nouveau produit
+          {t('products.new')}
         </Link>
       </div>
 
@@ -107,7 +109,7 @@ export default function ProductsPage() {
           </svg>
           <input
             type="text"
-            placeholder="Rechercher un produit…"
+            placeholder={t('products.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm pl-9 pr-3 py-2 placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors"
@@ -122,7 +124,7 @@ export default function ProductsPage() {
                 filter === f ? 'bg-[#262626] text-[#e8e2d6]' : 'text-[#57534e] hover:text-[#a8a29e]'
               }`}
             >
-              {f === 'all' ? 'Tous' : f === 'active' ? 'Actifs' : 'Archivés'}
+              {f === 'all' ? t('common.all') : f === 'active' ? t('common.active') : t('common.archived')}
             </button>
           ))}
         </div>
@@ -134,11 +136,11 @@ export default function ProductsPage() {
           <LoadingSpinner />
         ) : products.length === 0 ? (
           <EmptyState
-            title="Aucun produit trouvé"
-            description="Essayez de modifier vos filtres ou créez un nouveau produit."
+            title={t('products.emptyTitle')}
+            description={t('products.emptyDesc')}
             action={
               <Link to="/admin/products/new" className="text-xs text-[#c8b89a] hover:text-[#e8e2d6] transition-colors">
-                + Nouveau produit
+                {t('products.emptyAction')}
               </Link>
             }
           />
@@ -147,8 +149,8 @@ export default function ProductsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#262626]">
-                  {['Produit', 'Prix', 'Statut', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
+                  {[t('products.col.product'), t('products.col.price'), t('products.col.status'), t('products.col.actions')].map((h, i) => (
+                    <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -183,13 +185,13 @@ export default function ProductsPage() {
                           to={`/admin/products/${product.id}`}
                           className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30"
                         >
-                          Modifier
+                          {t('common.edit')}
                         </Link>
                         <button
                           onClick={() => setDeleteTarget(product)}
                           className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#f87171]/30"
                         >
-                          Suppr.
+                          {t('common.deleteShort')}
                         </button>
                       </div>
                     </td>
@@ -204,9 +206,9 @@ export default function ProductsPage() {
 
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Supprimer le produit"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteTarget?.name}" ? Cette action est irréversible.`}
-        confirmLabel="Supprimer"
+        title={t('products.deleteTitle')}
+        message={t('products.deleteMessage', { name: deleteTarget?.name })}
+        confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         danger

@@ -1,10 +1,13 @@
 import { Fragment, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { listCustomers } from '../services/customers';
 import ErrorBanner from '../components/ErrorBanner';
 import LoadingSpinner from '../components/LoadingSpinner';
 import type { Customer } from '../types';
 
 export default function CustomersPage() {
+  const { t, i18n } = useTranslation('admin');
+  const dateLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -40,9 +43,9 @@ export default function CustomersPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Commerce</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Clients</h2>
-        <p className="text-sm text-[#57534e] mt-0.5">{customers.length} clients inscrits</p>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('customers.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('customers.title')}</h2>
+        <p className="text-sm text-[#57534e] mt-0.5">{t('customers.count', { count: customers.length })}</p>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
@@ -54,7 +57,7 @@ export default function CustomersPage() {
         </svg>
         <input
           type="text"
-          placeholder="Rechercher un client…"
+          placeholder={t('customers.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm pl-9 pr-3 py-2 placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors"
@@ -66,14 +69,14 @@ export default function CustomersPage() {
           <div className="px-5 py-12"><LoadingSpinner /></div>
         ) : filtered.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <p className="text-[#57534e] text-sm">Aucun client trouvé</p>
+            <p className="text-[#57534e] text-sm">{t('customers.empty')}</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#262626]">
-                {['Nom', 'Email', 'Téléphone', 'Inscrit le', ''].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
+                {[t('customers.col.name'), t('customers.col.email'), t('customers.col.phone'), t('customers.col.registeredOn'), ''].map((h, i) => (
+                  <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -90,7 +93,7 @@ export default function CustomersPage() {
                     <td className="px-4 py-3 text-sm text-[#a8a29e]">{customer.email}</td>
                     <td className="px-4 py-3 text-sm text-[#57534e]">{customer.phone || '—'}</td>
                     <td className="px-4 py-3 text-sm text-[#57534e]">
-                      {new Date(customer.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(customer.created_at).toLocaleDateString(dateLocale)}
                     </td>
                     <td className="px-4 py-3 text-[#57534e]">
                       <svg
@@ -107,15 +110,15 @@ export default function CustomersPage() {
                       <td colSpan={5} className="px-4 py-4">
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <div>
-                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">ID client</p>
+                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('customers.customerId')}</p>
                             <p className="text-xs text-[#a8a29e] font-mono">{customer.id}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Email</p>
+                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('customers.email')}</p>
                             <p className="text-xs text-[#a8a29e]">{customer.email}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Téléphone</p>
+                            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('customers.phone')}</p>
                             <p className="text-xs text-[#a8a29e]">{customer.phone || '—'}</p>
                           </div>
                         </div>

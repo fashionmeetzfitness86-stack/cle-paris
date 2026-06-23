@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -9,10 +10,10 @@ interface SidebarProps {
 
 const navGroups = [
   {
-    title: 'Boutique',
+    title: 'nav.groupShop',
     items: [
       {
-        label: 'Produits',
+        label: 'nav.products',
         path: '/admin/products',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -24,7 +25,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Catégories',
+        label: 'nav.categories',
         path: '/admin/categories',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -33,7 +34,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Collections',
+        label: 'nav.collections',
         path: '/admin/collections',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -42,7 +43,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Médias',
+        label: 'nav.media',
         path: '/admin/media',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -55,10 +56,10 @@ const navGroups = [
     ],
   },
   {
-    title: 'Contenu',
+    title: 'nav.groupContent',
     items: [
       {
-        label: 'Homepage',
+        label: 'nav.homepage',
         path: '/admin/homepage',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -67,7 +68,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Bannière',
+        label: 'nav.banner',
         path: '/admin/banner',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -76,7 +77,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Blog',
+        label: 'nav.blog',
         path: '/admin/blog',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -85,7 +86,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Avis',
+        label: 'nav.testimonials',
         path: '/admin/testimonials',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -96,10 +97,10 @@ const navGroups = [
     ],
   },
   {
-    title: 'Commerce',
+    title: 'nav.groupCommerce',
     items: [
       {
-        label: 'Commandes',
+        label: 'nav.orders',
         path: '/admin/orders',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -108,7 +109,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Clients',
+        label: 'nav.customers',
         path: '/admin/customers',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -120,10 +121,10 @@ const navGroups = [
     ],
   },
   {
-    title: 'Paramètres',
+    title: 'nav.groupSettings',
     items: [
       {
-        label: 'SEO',
+        label: 'nav.seo',
         path: '/admin/seo',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -133,7 +134,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Mentions légales',
+        label: 'nav.legal',
         path: '/admin/legal',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -142,7 +143,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Traductions',
+        label: 'nav.i18n',
         path: '/admin/i18n',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -151,7 +152,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Paramètres',
+        label: 'nav.settingsLabel',
         path: '/admin/settings',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -160,7 +161,7 @@ const navGroups = [
         ),
       },
       {
-        label: 'Utilisateurs',
+        label: 'nav.users',
         path: '/admin/users',
         icon: (
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -176,6 +177,7 @@ const navGroups = [
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
 
   const handleLogout = () => {
     localStorage.removeItem('cle-admin-auth');
@@ -188,13 +190,13 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#262626] min-h-[56px]">
         {!collapsed && (
           <span className="text-[11px] uppercase tracking-[0.3em] text-[#e8e2d6] font-display font-semibold">
-            CLÉ PARIS
+            {t('nav.brand')}
           </span>
         )}
         <button
           onClick={onToggle}
           className="w-6 h-6 flex items-center justify-center text-[#57534e] hover:text-[#a8a29e] transition-colors duration-200 ml-auto"
-          aria-label="Toggle sidebar"
+          aria-label={t('nav.toggleSidebar')}
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
             {collapsed ? (
@@ -212,7 +214,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
           <div key={group.title}>
             {!collapsed && (
               <p className="px-4 pb-1.5 text-[9px] uppercase tracking-[0.25em] text-[#57534e] font-medium">
-                {group.title}
+                {t(group.title)}
               </p>
             )}
             {collapsed && <div className="border-t border-[#262626] mx-3 mb-2" />}
@@ -228,10 +230,10 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                           : 'text-[#57534e] border-l-2 border-transparent hover:text-[#a8a29e] hover:bg-white/[0.02]'
                       } ${collapsed ? 'justify-center' : ''}`
                     }
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? t(item.label) : undefined}
                   >
                     <span className="flex-shrink-0">{item.icon}</span>
-                    {!collapsed && <span>{item.label}</span>}
+                    {!collapsed && <span>{t(item.label)}</span>}
                   </NavLink>
                 </li>
               ))}
@@ -247,22 +249,22 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
           target="_blank"
           rel="noopener noreferrer"
           className={`flex items-center gap-3 px-4 py-2 text-sm text-[#57534e] hover:text-[#a8a29e] transition-colors duration-200 ${collapsed ? 'justify-center' : ''}`}
-          title={collapsed ? 'Voir la boutique' : undefined}
+          title={collapsed ? t('nav.viewShop') : undefined}
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 flex-shrink-0">
             <path d="M9 2h5v5h-1.5V4.5L6.5 10.5l-1-1L11.5 3.5H9V2zM3 4h3v1.5H4.5v7h7V11H13v2.5H3V4z" />
           </svg>
-          {!collapsed && <span>Voir la boutique</span>}
+          {!collapsed && <span>{t('nav.viewShop')}</span>}
         </a>
         <button
           onClick={handleLogout}
           className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-[#57534e] hover:text-[#f87171] transition-colors duration-200 ${collapsed ? 'justify-center' : ''}`}
-          title={collapsed ? 'Déconnexion' : undefined}
+          title={collapsed ? t('nav.logout') : undefined}
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 flex-shrink-0">
             <path d="M6 2H2v12h4v-1.5H3.5V3.5H6V2zM11 4.5l3.5 3.5-3.5 3.5-1-1 1.8-1.8H6.5V7.25h5.25L9.98 5.5l1.02-1z" />
           </svg>
-          {!collapsed && <span>Déconnexion</span>}
+          {!collapsed && <span>{t('nav.logout')}</span>}
         </button>
       </div>
     </div>

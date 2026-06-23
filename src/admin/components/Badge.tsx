@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { OrderStatus } from '../types';
 
 type BadgeVariant = OrderStatus | 'admin' | 'editor' | 'active' | 'archived' | 'published' | 'draft' | 'visible' | 'hidden';
@@ -20,32 +21,15 @@ const variantStyles: Record<BadgeVariant, string> = {
   hidden: 'bg-stone-400/10 text-stone-400 border-stone-400/20',
 };
 
-const variantLabels: Record<BadgeVariant, string> = {
-  pending: 'En attente',
-  paid: 'Payé',
-  processing: 'Traitement',
-  shipped: 'Expédié',
-  delivered: 'Livré',
-  refunded: 'Remboursé',
-  cancelled: 'Annulé',
-  admin: 'Admin',
-  editor: 'Éditeur',
-  active: 'Actif',
-  archived: 'Archivé',
-  published: 'Publié',
-  draft: 'Brouillon',
-  visible: 'Visible',
-  hidden: 'Masqué',
-};
-
 interface BadgeProps {
   variant: BadgeVariant;
   label?: string;
 }
 
 export default function Badge({ variant, label }: BadgeProps) {
+  const { t } = useTranslation('admin');
   const styles = variantStyles[variant] ?? 'bg-stone-400/10 text-stone-400 border-stone-400/20';
-  const text = label ?? variantLabels[variant] ?? variant;
+  const text = label ?? t(`badge.${variant}`, { defaultValue: variant });
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase tracking-widest font-medium border ${styles}`}>
       {text}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBanner from "../components/ErrorBanner";
 import EmptyState from "../components/EmptyState";
@@ -9,12 +10,12 @@ import { isSupabaseConfigured } from "../../lib/supabase";
 type Filter = "all" | "image" | "video";
 type Folder = "all" | "hero" | "products" | "images" | "videos";
 
-const FOLDERS: { key: Folder; label: string; prefix: string }[] = [
-  { key: "all",      label: "Tous",      prefix: "" },
-  { key: "hero",     label: "Hero",      prefix: "hero" },
-  { key: "products", label: "Produits",  prefix: "products" },
-  { key: "images",   label: "Images",    prefix: "images" },
-  { key: "videos",   label: "Vidéos",    prefix: "videos" },
+const FOLDERS: { key: Folder; labelKey: string; prefix: string }[] = [
+  { key: "all",      labelKey: "media.folderAll",      prefix: "" },
+  { key: "hero",     labelKey: "media.folderHero",     prefix: "hero" },
+  { key: "products", labelKey: "media.folderProducts", prefix: "products" },
+  { key: "images",   labelKey: "media.folderImages",   prefix: "images" },
+  { key: "videos",   labelKey: "media.folderVideos",   prefix: "videos" },
 ];
 
 function formatBytes(bytes: number): string {
@@ -24,6 +25,7 @@ function formatBytes(bytes: number): string {
 }
 
 export default function MediaPage() {
+  const { t } = useTranslation("admin");
   const [items,    setItems]    = useState<MediaItem[]>([]);
   const [filter,   setFilter]   = useState<Filter>("all");
   const [folder,   setFolder]   = useState<Folder>("all");
@@ -40,10 +42,10 @@ export default function MediaPage() {
     setLoading(true);
     const selectedFolder = FOLDERS.find((f) => f.key === folder);
     const { data, error: err } = await listMediaItems(selectedFolder?.prefix);
-    if (err) setError((err as { message?: string }).message ?? "Erreur de chargement");
+    if (err) setError((err as { message?: string }).message ?? t("media.loadError"));
     else if (data) setItems(data);
     setLoading(false);
-  }, [folder]);
+  }, [folder, t]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -55,7 +57,7 @@ export default function MediaPage() {
 
     for (const file of Array.from(files)) {
       const { url, error: err } = await uploadMedia(file, prefix);
-      if (err) { setError((err as { message?: string }).message ?? "Erreur upload"); break; }
+      if (err) { setError((err as { message?: string }).message ?? t("media.uploadError")); break; }
       if (url) {
         const newItem: MediaItem = {
           id: `media-${Date.now()}-${file.name}`,
@@ -95,7 +97,7 @@ export default function MediaPage() {
     <div className="flex h-full min-h-screen">
       {/* ── Folder sidebar ──────────────────────────────────────── */}
       <aside className="w-44 shrink-0 border-r border-[#1e1e1e] p-4 space-y-1">
-        <p className="text-[9px] uppercase tracking-widest text-[#57534e] mb-3">Dossiers</p>
+        <p className="text-[9px] uppercase tracking-widest text-[#57534e] mb-3">{t("media.folders")}</p>
         {FOLDERS.map((f) => (
           <button
             key={f.key}
@@ -106,7 +108,7 @@ export default function MediaPage() {
                 : "text-[#57534e] hover:text-[#a8a29e]"
             }`}
           >
-            {f.label}
+            {t(f.labelKey)}
           </button>
         ))}
       </aside>
@@ -116,9 +118,9 @@ export default function MediaPage() {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Contenu</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t("media.overline")}</p>
             <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">
-              Bibliothèque médias
+              {t("media.title")}
             </h2>
           </div>
           <button
@@ -126,7 +128,7 @@ export default function MediaPage() {
             disabled={uploading}
             className="text-xs bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f] font-semibold px-4 py-2 rounded transition-colors disabled:opacity-60"
           >
-            {uploading ? "Envoi…" : "+ Uploader"}
+            {uploading ? t("media.uploading") : t("media.upload")}
           </button>
           <input
             ref={inputRef}
@@ -154,8 +156,8 @@ export default function MediaPage() {
         >
           <p className="text-xs text-[#57534e]">
             {uploading
-              ? "Envoi en cours…"
-              : `Glissez-déposez ici ou cliquez — dossier : ${FOLDERS.find((f) => f.key === folder)?.label ?? "Tous"}`}
+              ? t("media.uploadingFull")
+              : t("media.dropzone", { folder: t(FOLDERS.find((f) => f.key === folder)?.labelKey ?? "media.folderAll") })}
           </p>
         </div>
 
@@ -171,11 +173,11 @@ export default function MediaPage() {
                   : "border-[#262626] text-[#57534e] hover:border-[#333]"
               }`}
             >
-              {f === "all" ? "Tous" : f === "image" ? "Images" : "Vidéos"}
+              {f === "all" ? t("media.filterAll") : f === "image" ? t("media.filterImages") : t("media.filterVideos")}
             </button>
           ))}
           <span className="ml-auto text-[10px] text-[#57534e] self-center">
-            {displayed.length} fichier{displayed.length !== 1 ? "s" : ""}
+            {t("media.fileCount", { count: displayed.length })}
           </span>
         </div>
 
@@ -184,8 +186,8 @@ export default function MediaPage() {
           <LoadingSpinner />
         ) : displayed.length === 0 ? (
           <EmptyState
-            title="Aucun média"
-            description="Uploadez vos premières images ou vidéos."
+            title={t("media.emptyTitle")}
+            description={t("media.emptyDesc")}
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -220,14 +222,14 @@ export default function MediaPage() {
                   <button
                     onClick={() => handleCopy(item.url, item.id)}
                     className="w-8 h-8 rounded bg-[#1a1a1a] flex items-center justify-center text-[#e8e2d6] hover:text-[#c8b89a] transition-colors text-sm"
-                    title="Copier l'URL"
+                    title={t("media.copyUrl")}
                   >
                     {copiedId === item.id ? "✓" : "⧉"}
                   </button>
                   <button
                     onClick={() => setConfirmId(item.id)}
                     className="w-8 h-8 rounded bg-[#1a1a1a] flex items-center justify-center text-[#57534e] hover:text-[#f87171] transition-colors text-sm"
-                    title="Supprimer"
+                    title={t("media.delete")}
                   >
                     ✕
                   </button>
@@ -271,19 +273,19 @@ export default function MediaPage() {
                   onClick={() => handleCopy(lightbox.url, lightbox.id)}
                   className="px-3 py-1.5 text-xs bg-[#1a1a1a] border border-[#262626] rounded text-[#a8a29e] hover:text-[#c8b89a] hover:border-[#c8b89a] transition-colors"
                 >
-                  {copiedId === lightbox.id ? "✓ Copié" : "Copier l'URL"}
+                  {copiedId === lightbox.id ? t("media.copied") : t("media.copyUrl")}
                 </button>
                 <button
                   onClick={() => setConfirmId(lightbox.id)}
                   className="px-3 py-1.5 text-xs bg-red-400/10 border border-red-400/20 rounded text-[#f87171] hover:bg-red-400/20 transition-colors"
                 >
-                  Supprimer
+                  {t("media.delete")}
                 </button>
                 <button
                   onClick={() => setLightbox(null)}
                   className="px-3 py-1.5 text-xs bg-[#1a1a1a] border border-[#262626] rounded text-[#57534e] hover:text-[#e8e2d6] transition-colors"
                 >
-                  Fermer
+                  {t("common.close")}
                 </button>
               </div>
             </div>
@@ -299,22 +301,22 @@ export default function MediaPage() {
             className="relative z-10 w-full max-w-sm mx-4 bg-[#1a1a1a] border border-[#262626] rounded-lg p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-[#e8e2d6] font-semibold mb-2">Supprimer le fichier</h3>
+            <h3 className="text-[#e8e2d6] font-semibold mb-2">{t("media.deleteFileTitle")}</h3>
             <p className="text-[#a8a29e] text-sm mb-6">
-              Ce fichier sera supprimé définitivement du stockage.
+              {t("media.deleteFileMessage")}
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmId(null)}
                 className="px-4 py-2 text-sm text-[#a8a29e] border border-[#262626] rounded hover:border-[#57534e] transition-colors"
               >
-                Annuler
+                {t("common.cancel")}
               </button>
               <button
                 onClick={handleDelete}
                 className="px-4 py-2 text-sm bg-red-400/10 text-[#f87171] border border-red-400/20 rounded hover:bg-red-400/20 transition-colors"
               >
-                Supprimer
+                {t("media.delete")}
               </button>
             </div>
           </div>

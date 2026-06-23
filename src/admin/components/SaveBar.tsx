@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface SaveBarProps {
   hasChanges: boolean;
@@ -8,6 +9,7 @@ interface SaveBarProps {
 }
 
 export default function SaveBar({ hasChanges, onSave, onDiscard, saving = false }: SaveBarProps) {
+  const { t } = useTranslation("admin");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,14 +29,14 @@ export default function SaveBar({ hasChanges, onSave, onDiscard, saving = false 
         hasChanges ? "translate-y-0" : "translate-y-full"
       }`}
     >
-      <p className="text-xs text-[#57534e]">Vous avez des modifications non sauvegardées</p>
+      <p className="text-xs text-[#57534e]">{t("common.unsavedChanges")}</p>
       <div className="flex items-center gap-3">
         <button
           onClick={onDiscard}
           disabled={saving}
           className="text-xs text-[#57534e] hover:text-[#a8a29e] transition-colors disabled:opacity-40"
         >
-          Annuler
+          {t("common.cancel")}
         </button>
         <button
           onClick={onSave}
@@ -47,7 +49,7 @@ export default function SaveBar({ hasChanges, onSave, onDiscard, saving = false 
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           )}
-          {saving ? "Enregistrement…" : "Enregistrer"}
+          {saving ? t("common.saving") : t("common.save")}
         </button>
       </div>
     </div>

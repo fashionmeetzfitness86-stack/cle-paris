@@ -1,17 +1,13 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { fetchLegalPage } from "../lib/storefront";
-import type { Lang } from "../types";
+-- ============================================================
+-- CLÉ PARIS — Migration 004: Real legal page content (FR + EN)
+-- Replaces the placeholder legal text seeded in 001.
+-- Run AFTER 001/002/003. Safe to re-run.
+-- [crochets] = champs d'identité légale à compléter par l'éditeur.
+-- ============================================================
 
-// ── Static fallback content ───────────────────────────────────────
-// NOTE: fields in [crochets] are placeholders only you can fill
-// (identité légale de l'éditeur). Tout le reste est définitif.
-const STATIC_LEGAL: Record<string, { title: { fr: string; en: string }; body: { fr: string; en: string } }> = {
-  mentions: {
-    title: { fr: "Mentions légales", en: "Legal Notice" },
-    body: {
-      fr: `ÉDITEUR DU SITE
+INSERT INTO public.legal_pages (slug, title_fr, title_en, body_fr, body_en) VALUES
+('mentions-legales', 'Mentions légales', 'Legal Notice',
+$fr$ÉDITEUR DU SITE
 Le site cle-paris.com est édité par CLÉ PARIS, marque indépendante de prêt-à-porter.
 Contact : Clepariscollection@gmail.com
 
@@ -27,8 +23,8 @@ PROPRIÉTÉ INTELLECTUELLE
 L'ensemble des contenus du site (textes, visuels, logo, créations et photographies) est la propriété exclusive de CLÉ PARIS et est protégé par le droit de la propriété intellectuelle. Toute reproduction ou utilisation, totale ou partielle, sans autorisation écrite préalable est interdite.
 
 CONTACT
-Pour toute question, écrivez-nous à Clepariscollection@gmail.com.`,
-      en: `SITE PUBLISHER
+Pour toute question, écrivez-nous à Clepariscollection@gmail.com.$fr$,
+$en$SITE PUBLISHER
 The cle-paris.com website is published by CLÉ PARIS, an independent ready-to-wear brand.
 Contact: Clepariscollection@gmail.com
 
@@ -44,13 +40,10 @@ INTELLECTUAL PROPERTY
 All content on this site (text, visuals, logo, designs and photographs) is the exclusive property of CLÉ PARIS and is protected by intellectual property law. Any reproduction or use, in whole or in part, without prior written consent is prohibited.
 
 CONTACT
-For any question, write to us at Clepariscollection@gmail.com.`,
-    },
-  },
-  conditions: {
-    title: { fr: "Conditions générales de vente", en: "Terms & Conditions" },
-    body: {
-      fr: `1. OBJET
+For any question, write to us at Clepariscollection@gmail.com.$en$),
+
+('cgv', 'Conditions générales de vente', 'Terms & Conditions',
+$fr$1. OBJET
 Les présentes conditions régissent la vente des articles proposés sur cle-paris.com par CLÉ PARIS. Toute commande implique l'acceptation pleine et entière des présentes CGV.
 
 2. PRIX
@@ -75,8 +68,8 @@ Le remboursement intervient dans un délai de 14 jours après réception et vér
 Les produits bénéficient des garanties légales de conformité et contre les vices cachés.
 
 9. CONTACT
-Pour toute question relative à une commande : Clepariscollection@gmail.com.`,
-      en: `1. PURPOSE
+Pour toute question relative à une commande : Clepariscollection@gmail.com.$fr$,
+$en$1. PURPOSE
 These terms govern the sale of items offered on cle-paris.com by CLÉ PARIS. Any order implies full acceptance of these Terms & Conditions.
 
 2. PRICES
@@ -101,13 +94,10 @@ Refunds are issued within 14 days of receiving and inspecting the return, using 
 Products benefit from the legal warranties of conformity and against hidden defects.
 
 9. CONTACT
-For any question about an order: Clepariscollection@gmail.com.`,
-    },
-  },
-  confidentialite: {
-    title: { fr: "Politique de confidentialité", en: "Privacy Policy" },
-    body: {
-      fr: `CLÉ PARIS attache une grande importance à la protection de vos données personnelles.
+For any question about an order: Clepariscollection@gmail.com.$en$),
+
+('confidentialite', 'Politique de confidentialité', 'Privacy Policy',
+$fr$CLÉ PARIS attache une grande importance à la protection de vos données personnelles.
 
 DONNÉES COLLECTÉES
 Nous collectons uniquement les données nécessaires au traitement de vos commandes : nom, prénom, adresse de livraison, adresse e-mail, numéro de téléphone et détails de la commande.
@@ -128,8 +118,8 @@ VOS DROITS
 Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition et de portabilité de vos données. Pour les exercer : Clepariscollection@gmail.com.
 
 COOKIES
-Le site utilise des cookies essentiels à son fonctionnement (panier, préférence de langue). Aucun cookie publicitaire n'est utilisé sans votre consentement.`,
-      en: `CLÉ PARIS takes the protection of your personal data very seriously.
+Le site utilise des cookies essentiels à son fonctionnement (panier, préférence de langue). Aucun cookie publicitaire n'est utilisé sans votre consentement.$fr$,
+$en$CLÉ PARIS takes the protection of your personal data very seriously.
 
 DATA COLLECTED
 We only collect the data needed to process your orders: first and last name, delivery address, email address, phone number and order details.
@@ -150,13 +140,10 @@ YOUR RIGHTS
 In accordance with the GDPR, you have the right to access, rectify, erase, object to and port your data. To exercise these rights: Clepariscollection@gmail.com.
 
 COOKIES
-The site uses cookies essential to its operation (cart, language preference). No advertising cookies are used without your consent.`,
-    },
-  },
-  livraison: {
-    title: { fr: "Livraison & retours", en: "Shipping & Returns" },
-    body: {
-      fr: `LIVRAISON
+The site uses cookies essential to its operation (cart, language preference). No advertising cookies are used without your consent.$en$),
+
+('livraison-retours', 'Livraison & retours', 'Shipping & Returns',
+$fr$LIVRAISON
 Les commandes sont préparées et expédiées sous 48 h ouvrées. Un numéro de suivi vous est communiqué dès l'expédition.
 
 FRAIS DE LIVRAISON
@@ -172,8 +159,8 @@ REMBOURSEMENT
 Une fois le retour reçu et vérifié, le remboursement est effectué sous 14 jours sur le moyen de paiement initial.
 
 CONTACT
-Pour organiser un retour ou pour toute question : Clepariscollection@gmail.com.`,
-      en: `SHIPPING
+Pour organiser un retour ou pour toute question : Clepariscollection@gmail.com.$fr$,
+$en$SHIPPING
 Orders are prepared and dispatched within 48 working hours. A tracking number is sent to you as soon as your order ships.
 
 SHIPPING COSTS
@@ -189,63 +176,10 @@ REFUNDS
 Once the return is received and inspected, the refund is issued within 14 days to the original payment method.
 
 CONTACT
-To arrange a return or for any question: Clepariscollection@gmail.com.`,
-    },
-  },
-};
+To arrange a return or for any question: Clepariscollection@gmail.com.$en$)
 
-// Map URL slug to DB slug
-const SLUG_MAP: Record<string, string> = {
-  mentions:       "mentions-legales",
-  conditions:     "cgv",
-  confidentialite: "confidentialite",
-  livraison:      "livraison-retours",
-};
-
-export default function LegalPage() {
-  const { slug = "mentions" } = useParams();
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language as Lang;
-
-  const staticPage = STATIC_LEGAL[slug] ?? STATIC_LEGAL.mentions;
-  const [title, setTitle] = useState(staticPage.title[lang]);
-  const [body, setBody]   = useState(staticPage.body[lang]);
-
-  useEffect(() => {
-    // Reset to static content when slug changes
-    const page = STATIC_LEGAL[slug] ?? STATIC_LEGAL.mentions;
-    setTitle(page.title[lang]);
-    setBody(page.body[lang]);
-
-    // Try fetching live content from DB
-    const dbSlug = SLUG_MAP[slug] ?? slug;
-    fetchLegalPage(dbSlug).then((data) => {
-      if (data) {
-        setTitle(lang === "fr" ? data.title_fr : data.title_en);
-        setBody(lang === "fr" ? data.body_fr : data.body_en);
-      }
-    });
-  }, [slug, lang]);
-
-  return (
-    <div className="mx-auto max-w-3xl px-6 py-24 animate-fade-up">
-      <Link
-        to="/"
-        className="group inline-flex items-center gap-2 text-xs uppercase tracking-widest text-stone-600 hover:text-bone transition-colors duration-300 mb-10"
-      >
-        <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span>
-        {t("common.back")}
-      </Link>
-
-      <div className="h-px bg-gradient-to-r from-stone-800 to-transparent mb-10 animate-fade-up delay-75" />
-
-      <h1 className="font-display text-4xl tracking-tight animate-fade-up delay-100">
-        {title}
-      </h1>
-
-      <div className="mt-8 whitespace-pre-line text-sm leading-loose text-stone-400 animate-fade-up delay-200">
-        {body}
-      </div>
-    </div>
-  );
-}
+ON CONFLICT (slug) DO UPDATE SET
+  title_fr = EXCLUDED.title_fr,
+  title_en = EXCLUDED.title_en,
+  body_fr  = EXCLUDED.body_fr,
+  body_en  = EXCLUDED.body_en;

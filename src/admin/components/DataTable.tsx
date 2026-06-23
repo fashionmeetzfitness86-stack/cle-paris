@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export type Column<T> = {
   key: string;
@@ -19,10 +20,11 @@ interface DataTableProps<T extends Record<string, unknown>> {
 export default function DataTable<T extends Record<string, unknown>>({
   columns,
   data,
-  emptyMessage = 'Aucune donnée',
+  emptyMessage,
   emptySubMessage,
   getRowKey,
 }: DataTableProps<T>) {
+  const { t } = useTranslation('admin');
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
@@ -77,7 +79,7 @@ export default function DataTable<T extends Record<string, unknown>>({
           {sortedData.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-4 py-12 text-center">
-                <p className="text-[#57534e] text-sm">{emptyMessage}</p>
+                <p className="text-[#57534e] text-sm">{emptyMessage ?? t('common.noData')}</p>
                 {emptySubMessage && <p className="text-[#57534e] text-xs mt-1">{emptySubMessage}</p>}
               </td>
             </tr>

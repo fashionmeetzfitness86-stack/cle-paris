@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Toggle from '../components/Toggle';
 import FormField from '../components/FormField';
 import ConfirmModal from '../components/ConfirmModal';
@@ -18,6 +19,7 @@ function CollectionModal({
   onSave: (c: Omit<Collection, 'id'> & { id?: string }) => Promise<void>;
   onClose: () => void;
 }) {
+  const { t } = useTranslation('admin');
   const [form, setForm] = useState<Partial<Collection>>(collection ?? {
     slug: '', name_fr: '', name_en: '', description_fr: '', description_en: '', cover_image: '', is_active: true,
   });
@@ -49,24 +51,24 @@ function CollectionModal({
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div className="relative z-10 w-full max-w-lg mx-4 bg-[#1a1a1a] border border-[#262626] rounded-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-[#e8e2d6] font-display font-semibold text-base mb-4">
-          {(collection as Collection)?.id ? 'Modifier la collection' : 'Nouvelle collection'}
+          {(collection as Collection)?.id ? t('collections.editTitle') : t('collections.newModalTitle')}
         </h3>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormField id="col-name-fr" label="Nom FR" required value={form.name_fr ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_fr: (e.target as HTMLInputElement).value }))} />
-            <FormField id="col-name-en" label="Nom EN" value={form.name_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_en: (e.target as HTMLInputElement).value }))} />
+            <FormField id="col-name-fr" label={t('collections.nameFr')} required value={form.name_fr ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_fr: (e.target as HTMLInputElement).value }))} />
+            <FormField id="col-name-en" label={t('collections.nameEn')} value={form.name_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_en: (e.target as HTMLInputElement).value }))} />
           </div>
-          <FormField id="col-slug" label="Slug" required value={form.slug ?? ''} onChange={(e) => setForm((f) => ({ ...f, slug: (e.target as HTMLInputElement).value }))} />
-          <FormField as="textarea" id="col-desc-fr" label="Description FR" rows={3} value={form.description_fr ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_fr: (e.target as HTMLTextAreaElement).value }))} />
-          <FormField as="textarea" id="col-desc-en" label="Description EN" rows={3} value={form.description_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_en: (e.target as HTMLTextAreaElement).value }))} />
-          <FormField id="col-cover" label="Image de couverture (URL)" value={form.cover_image ?? ''} onChange={(e) => setForm((f) => ({ ...f, cover_image: (e.target as HTMLInputElement).value }))} />
-          <Toggle id="col-active" checked={form.is_active ?? true} onChange={(v) => setForm((f) => ({ ...f, is_active: v }))} label="Collection active" description="Visible dans la boutique" />
+          <FormField id="col-slug" label={t('collections.slug')} required value={form.slug ?? ''} onChange={(e) => setForm((f) => ({ ...f, slug: (e.target as HTMLInputElement).value }))} />
+          <FormField as="textarea" id="col-desc-fr" label={t('collections.descriptionFr')} rows={3} value={form.description_fr ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_fr: (e.target as HTMLTextAreaElement).value }))} />
+          <FormField as="textarea" id="col-desc-en" label={t('collections.descriptionEn')} rows={3} value={form.description_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_en: (e.target as HTMLTextAreaElement).value }))} />
+          <FormField id="col-cover" label={t('collections.coverImage')} value={form.cover_image ?? ''} onChange={(e) => setForm((f) => ({ ...f, cover_image: (e.target as HTMLInputElement).value }))} />
+          <Toggle id="col-active" checked={form.is_active ?? true} onChange={(v) => setForm((f) => ({ ...f, is_active: v }))} label={t('collections.toggleActive')} description={t('collections.toggleActiveDesc')} />
         </div>
         <div className="flex gap-3 mt-6">
           <button onClick={handleSave} disabled={saving} className="bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f] text-sm font-semibold px-5 py-2 rounded transition-colors disabled:opacity-60">
-            {saving ? 'Enregistrement…' : 'Enregistrer'}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
-          <button onClick={onClose} className="text-sm text-[#57534e] hover:text-[#a8a29e] px-5 py-2 border border-[#262626] rounded transition-colors">Annuler</button>
+          <button onClick={onClose} className="text-sm text-[#57534e] hover:text-[#a8a29e] px-5 py-2 border border-[#262626] rounded transition-colors">{t('common.cancel')}</button>
         </div>
       </div>
     </div>
@@ -74,6 +76,7 @@ function CollectionModal({
 }
 
 export default function CollectionsPage() {
+  const { t } = useTranslation('admin');
   const [collections, setCollections] = useState<Collection[]>(mockCollections);
   const [editTarget, setEditTarget] = useState<Collection | null>(null);
   const [showNew, setShowNew] = useState(false);
@@ -89,11 +92,11 @@ export default function CollectionsPage() {
       if (svcErr) { setError(svcErr.message); return; }
       if (data) setCollections(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadCollections();
@@ -112,7 +115,7 @@ export default function CollectionsPage() {
       setEditTarget(null);
       setShowNew(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la sauvegarde');
+      setError(e instanceof Error ? e.message : t('common.saveError'));
     }
   };
 
@@ -124,7 +127,7 @@ export default function CollectionsPage() {
       setCollections((prev) => prev.filter((c) => c.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression');
+      setError(e instanceof Error ? e.message : t('common.deleteError'));
       setDeleteTarget(null);
     }
   };
@@ -143,9 +146,9 @@ export default function CollectionsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Boutique</p>
-          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Collections</h2>
-          <p className="text-sm text-[#57534e] mt-0.5">{collections.length} collection{collections.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('collections.overline')}</p>
+          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('collections.title')}</h2>
+          <p className="text-sm text-[#57534e] mt-0.5">{t('collections.count', { count: collections.length })}</p>
         </div>
         <button
           onClick={() => setShowNew(true)}
@@ -154,7 +157,7 @@ export default function CollectionsPage() {
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Nouvelle collection
+          {t('collections.new')}
         </button>
       </div>
 
@@ -164,7 +167,7 @@ export default function CollectionsPage() {
         <LoadingSpinner />
       ) : collections.length === 0 ? (
         <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg px-5 py-12 text-center">
-          <EmptyState title="Aucune collection créée" description="Créez votre première collection." />
+          <EmptyState title={t('collections.emptyTitle')} description={t('collections.emptyDesc')} />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -174,7 +177,7 @@ export default function CollectionsPage() {
                 {col.cover_image ? (
                   <img src={col.cover_image} alt={col.name_fr} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[#57534e] text-xs">Pas d'image</div>
+                  <div className="w-full h-full flex items-center justify-center text-[#57534e] text-xs">{t('collections.noImage')}</div>
                 )}
               </div>
               <div className="p-4">
@@ -191,8 +194,8 @@ export default function CollectionsPage() {
                 </div>
                 <p className="text-xs text-[#57534e] line-clamp-2 mb-3">{col.description_fr || '—'}</p>
                 <div className="flex gap-2">
-                  <button onClick={() => setEditTarget(col)} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-3 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">Modifier</button>
-                  <button onClick={() => setDeleteTarget(col)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-3 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">Supprimer</button>
+                  <button onClick={() => setEditTarget(col)} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-3 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">{t('common.edit')}</button>
+                  <button onClick={() => setDeleteTarget(col)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-3 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">{t('common.delete')}</button>
                 </div>
               </div>
             </div>
@@ -210,9 +213,9 @@ export default function CollectionsPage() {
 
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Supprimer la collection"
-        message={`Supprimer "${deleteTarget?.name_fr}" ?`}
-        confirmLabel="Supprimer"
+        title={t('collections.deleteTitle')}
+        message={t('collections.deleteMessage', { name: deleteTarget?.name_fr })}
+        confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         danger

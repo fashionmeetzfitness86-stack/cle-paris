@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
 import EmptyState from '../components/EmptyState';
@@ -15,16 +16,6 @@ import type { HomepageSection } from '../types';
 
 type Lang = 'fr' | 'en';
 type MediaTarget = 'image' | 'video_url' | null;
-
-const SECTION_TYPE_LABELS: Record<string, string> = {
-  hero:               'Hero',
-  collection_banner:  'Collection',
-  text_block:         'Texte',
-  product_grid:       'Produits',
-  testimonial_strip:  'Témoignage',
-  newsletter:         'Newsletter',
-  media_grid:         'Grille médias',
-};
 
 const TYPE_BADGE_COLORS: Record<string, string> = {
   hero:              'bg-[#c8b89a]/15 text-[#c8b89a]',
@@ -77,6 +68,9 @@ const DEFAULT_FIELDS = {
 };
 
 export default function HomepageEditorPage() {
+  const { t } = useTranslation('admin');
+  const sectionTypeLabel = (type: string) =>
+    t(`homepage.type.${type}`, { defaultValue: type });
   const [sections,   setSections]   = useState<HomepageSection[]>(mockHomepageSections);
   const [selected,   setSelected]   = useState<HomepageSection | null>(null);
   const [editLang,   setEditLang]   = useState<Lang>('fr');
@@ -149,13 +143,13 @@ export default function HomepageEditorPage() {
         {/* ── Left: Section list ──────────────────────────────── */}
         <aside className="w-64 shrink-0 border-r border-[#1e1e1e] flex flex-col">
           <div className="px-4 py-4 border-b border-[#1e1e1e]">
-            <p className="text-[9px] uppercase tracking-widest text-[#57534e] mb-0.5">Contenu</p>
-            <h2 className="text-sm font-display font-semibold text-[#e8e2d6]">Homepage</h2>
+            <p className="text-[9px] uppercase tracking-widest text-[#57534e] mb-0.5">{t('homepage.overline')}</p>
+            <h2 className="text-sm font-display font-semibold text-[#e8e2d6]">{t('homepage.title')}</h2>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
             {sections.length === 0 ? (
-              <EmptyState title="Aucune section" description="Ajoutez des sections via la base de données." />
+              <EmptyState title={t('homepage.emptyTitle')} description={t('homepage.emptyDesc')} />
             ) : sections.map((s, idx) => (
               <div
                 key={s.id}
@@ -186,7 +180,7 @@ export default function HomepageEditorPage() {
                   <span className={`inline-block mt-1 text-[9px] px-1.5 py-0.5 rounded font-medium ${
                     TYPE_BADGE_COLORS[s.type] ?? 'bg-[#262626] text-[#57534e]'
                   }`}>
-                    {SECTION_TYPE_LABELS[s.type] ?? s.type}
+                    {sectionTypeLabel(s.type)}
                   </span>
                 </div>
 
@@ -209,7 +203,7 @@ export default function HomepageEditorPage() {
 
           {!selected ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-xs text-[#57534e]">Sélectionnez une section pour la modifier</p>
+              <p className="text-xs text-[#57534e]">{t('homepage.selectPrompt')}</p>
             </div>
           ) : (
             <div className="p-5 space-y-5">
@@ -219,9 +213,9 @@ export default function HomepageEditorPage() {
                   <span className={`text-[9px] px-2 py-0.5 rounded font-medium ${
                     TYPE_BADGE_COLORS[selected.type] ?? 'bg-[#262626] text-[#57534e]'
                   }`}>
-                    {SECTION_TYPE_LABELS[selected.type] ?? selected.type}
+                    {sectionTypeLabel(selected.type)}
                   </span>
-                  <p className="text-[10px] text-[#57534e] mt-1">key: {selected.key}</p>
+                  <p className="text-[10px] text-[#57534e] mt-1">{t('homepage.key', { key: selected.key })}</p>
                 </div>
                 {/* Language toggle */}
                 <div className="flex gap-1 bg-[#111] border border-[#262626] rounded p-0.5">
@@ -240,7 +234,7 @@ export default function HomepageEditorPage() {
               {/* Title */}
               {fields.showTitle && (
                 <FieldInput
-                  label={`Titre (${editLang.toUpperCase()})`}
+                  label={t('homepage.fieldTitle', { lang: editLang.toUpperCase() })}
                   value={editLang === 'fr' ? selected.title_fr : selected.title_en}
                   onChange={(v) => updateField(editLang === 'fr' ? 'title_fr' : 'title_en', v)}
                 />
@@ -249,7 +243,7 @@ export default function HomepageEditorPage() {
               {/* Subtitle */}
               {fields.showSubtitle && (
                 <FieldInput
-                  label={`Sous-titre (${editLang.toUpperCase()})`}
+                  label={t('homepage.fieldSubtitle', { lang: editLang.toUpperCase() })}
                   value={editLang === 'fr' ? selected.subtitle_fr : selected.subtitle_en}
                   onChange={(v) => updateField(editLang === 'fr' ? 'subtitle_fr' : 'subtitle_en', v)}
                 />
@@ -258,7 +252,7 @@ export default function HomepageEditorPage() {
               {/* Body */}
               {fields.showBody && (
                 <FieldTextarea
-                  label={`Corps (${editLang.toUpperCase()})`}
+                  label={t('homepage.fieldBody', { lang: editLang.toUpperCase() })}
                   value={editLang === 'fr' ? selected.body_fr : selected.body_en}
                   onChange={(v) => updateField(editLang === 'fr' ? 'body_fr' : 'body_en', v)}
                 />
@@ -267,7 +261,7 @@ export default function HomepageEditorPage() {
               {/* Image */}
               {fields.showImage && (
                 <FieldMedia
-                  label="Image de fond"
+                  label={t('homepage.fieldImage')}
                   value={selected.image}
                   onChange={(v) => updateField('image', v)}
                   onBrowse={() => setMediaPicker('image')}
@@ -278,7 +272,7 @@ export default function HomepageEditorPage() {
               {/* Video */}
               {fields.showVideo && (
                 <FieldMedia
-                  label="Vidéo (URL directe, YouTube, Vimeo)"
+                  label={t('homepage.fieldVideo')}
                   value={selected.video_url}
                   onChange={(v) => updateField('video_url', v)}
                   onBrowse={() => setMediaPicker('video_url')}
@@ -289,7 +283,7 @@ export default function HomepageEditorPage() {
               {/* Link */}
               {fields.showLink && (
                 <FieldInput
-                  label="Lien (ex: /collection)"
+                  label={t('homepage.fieldLink')}
                   value={selected.link}
                   onChange={(v) => updateField('link', v)}
                 />
@@ -297,7 +291,7 @@ export default function HomepageEditorPage() {
 
               {/* Visibility toggle */}
               <div className="flex items-center justify-between border-t border-[#1e1e1e] pt-4">
-                <span className="text-xs text-[#a8a29e]">Visible sur la homepage</span>
+                <span className="text-xs text-[#a8a29e]">{t('homepage.visibleOnHomepage')}</span>
                 <Toggle
                   id="selected-vis"
                   checked={selected.is_visible}
@@ -311,7 +305,7 @@ export default function HomepageEditorPage() {
                 disabled={!hasChanges || saving}
                 className="w-full py-2.5 text-xs font-semibold uppercase tracking-widest rounded transition-all duration-200 bg-[#c8b89a] text-[#0f0f0f] hover:bg-[#b8a88a] disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {saving ? 'Enregistrement…' : hasChanges ? 'Enregistrer les modifications' : 'Aucune modification'}
+                {saving ? t('common.saving') : hasChanges ? t('common.saveChanges') : t('common.noChanges')}
               </button>
             </div>
           )}
@@ -320,20 +314,20 @@ export default function HomepageEditorPage() {
         {/* ── Right: Live preview ─────────────────────────────── */}
         <div className="w-[360px] shrink-0 flex flex-col bg-[#0a0a0a]">
           <div className="flex items-center justify-between px-4 py-2 border-b border-[#1e1e1e]">
-            <p className="text-[10px] uppercase tracking-widest text-[#57534e]">Aperçu</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#57534e]">{t('homepage.preview')}</p>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPreviewMode('desktop')}
                 className={`text-[10px] px-2 py-1 rounded transition-colors ${previewMode === 'desktop' ? 'text-[#c8b89a]' : 'text-[#57534e]'}`}
-              >Bureau</button>
+              >{t('homepage.desktop')}</button>
               <button
                 onClick={() => setPreviewMode('mobile')}
                 className={`text-[10px] px-2 py-1 rounded transition-colors ${previewMode === 'mobile' ? 'text-[#c8b89a]' : 'text-[#57534e]'}`}
-              >Mobile</button>
+              >{t('homepage.mobile')}</button>
               <button
                 onClick={() => setIframeKey((k) => k + 1)}
                 className="text-[#57534e] hover:text-[#a8a29e] text-xs transition-colors"
-                title="Actualiser"
+                title={t('homepage.refresh')}
               >↻</button>
             </div>
           </div>
@@ -344,7 +338,7 @@ export default function HomepageEditorPage() {
               className={`border border-[#1e1e1e] rounded bg-white transition-all duration-300 ${
                 previewMode === 'mobile' ? 'w-[375px] h-[700px] scale-[0.85] origin-top' : 'w-full h-full'
               }`}
-              title="Homepage preview"
+              title={t('homepage.preview')}
               sandbox="allow-scripts allow-same-origin"
             />
           </div>
@@ -411,6 +405,7 @@ function FieldMedia({
   onBrowse: () => void;
   type: 'image' | 'video';
 }) {
+  const { t } = useTranslation('admin');
   return (
     <div>
       <label className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{label}</label>
@@ -418,14 +413,14 @@ function FieldMedia({
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={type === 'video' ? 'https://vimeo.com/… ou URL directe .mp4' : 'https://…'}
+          placeholder={type === 'video' ? t('homepage.videoPlaceholder') : t('homepage.imagePlaceholder')}
           className="flex-1 bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm px-3 py-2 focus:outline-none focus:border-[#c8b89a] transition-colors"
         />
         <button
           onClick={onBrowse}
           className="shrink-0 text-xs bg-[#1a1a1a] border border-[#262626] rounded px-3 py-2 text-[#a8a29e] hover:text-[#c8b89a] hover:border-[#c8b89a] transition-colors whitespace-nowrap"
         >
-          Parcourir
+          {t('common.browse')}
         </button>
       </div>
       {/* Image preview */}

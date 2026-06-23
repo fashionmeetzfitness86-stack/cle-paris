@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import FormField from '../components/FormField';
 import Toggle from '../components/Toggle';
 import SaveBar from '../components/SaveBar';
@@ -41,6 +42,7 @@ const tmpId = () => `tmp-${Date.now()}-${tmpCounter++}`;
 const isTempId = (v: string) => v.startsWith('tmp-');
 
 export default function ProductEditPage() {
+  const { t } = useTranslation('admin');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = id === 'new';
@@ -189,7 +191,7 @@ export default function ProductEditPage() {
     try {
       for (const file of Array.from(files)) {
         const { url, error: upErr } = await uploadMedia(file, 'products');
-        if (upErr || !url) { setError(upErr?.message ?? 'Échec du téléversement.'); continue; }
+        if (upErr || !url) { setError(upErr?.message ?? t('productEdit.errUpload')); continue; }
         setMedia((m) => [
           ...m,
           { id: tmpId(), product_id: isNew ? '' : (id ?? ''), url, alt: form.name, type: 'image', sort_order: m.length + 1 },
@@ -209,7 +211,7 @@ export default function ProductEditPage() {
     const payload = isNew ? form : { ...form, id };
     const { data: savedProduct, error: err } = await upsertProduct(payload);
     if (err || !savedProduct) {
-      setError(err?.message ?? 'Échec de l’enregistrement du produit.');
+      setError(err?.message ?? t('productEdit.errSaveProduct'));
       setSaving(false);
       return;
     }
@@ -231,7 +233,7 @@ export default function ProductEditPage() {
         };
         if (isTempId(color.id)) {
           const { data, error: cErr } = await upsertProductColor(base);
-          if (cErr || !data) throw new Error(cErr?.message ?? 'Échec de l’enregistrement d’une couleur.');
+          if (cErr || !data) throw new Error(cErr?.message ?? t('productEdit.errSaveColor'));
           colorIdMap[color.id] = data.id;
         } else {
           const { error: cErr } = await upsertProductColor({ id: color.id, ...base });
@@ -271,7 +273,7 @@ export default function ProductEditPage() {
         order++;
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Échec de l’enregistrement des détails du produit.');
+      setError(e instanceof Error ? e.message : t('productEdit.errSaveDetails'));
       setSaving(false);
       return;
     }
@@ -293,10 +295,10 @@ export default function ProductEditPage() {
         </Link>
         <div>
           <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">
-            {isNew ? 'Nouveau produit' : `Modifier — ${form.name}`}
+            {isNew ? t('productEdit.newTitle') : t('productEdit.editTitle', { name: form.name })}
           </h2>
           <p className="text-sm text-[#57534e] mt-0.5">
-            {isNew ? 'Créer un nouveau produit' : 'Modifier les informations du produit'}
+            {isNew ? t('productEdit.newSub') : t('productEdit.editSub')}
           </p>
         </div>
       </div>
@@ -305,29 +307,29 @@ export default function ProductEditPage() {
 
       <div className="space-y-5">
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Informations de base</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionBasic')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
-              id="prod-name" label="Nom du produit" required value={form.name}
+              id="prod-name" label={t('productEdit.name')} required value={form.name}
               onChange={(e) => handleNameChange((e.target as HTMLInputElement).value)}
             />
             <FormField
-              id="prod-slug" label="Slug" value={form.slug}
+              id="prod-slug" label={t('productEdit.slug')} value={form.slug}
               onChange={(e) => { setForm((f) => ({ ...f, slug: (e.target as HTMLInputElement).value })); setHasChanges(true); }}
-              hint="Généré automatiquement depuis le nom"
+              hint={t('productEdit.slugHint')}
             />
-            <FormField as="select" id="prod-category" label="Catégorie"
+            <FormField as="select" id="prod-category" label={t('productEdit.category')}
               value={form.category_id ?? ''}
               onChange={(e) => { setForm((f) => ({ ...f, category_id: (e.target as HTMLSelectElement).value || null })); setHasChanges(true); }}
             >
-              <option value="">— Sans catégorie —</option>
+              <option value="">{t('productEdit.noCategory')}</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
             </FormField>
-            <FormField as="select" id="prod-collection" label="Collection"
+            <FormField as="select" id="prod-collection" label={t('productEdit.collection')}
               value={form.collection_id ?? ''}
               onChange={(e) => { setForm((f) => ({ ...f, collection_id: (e.target as HTMLSelectElement).value || null })); setHasChanges(true); }}
             >
-              <option value="">— Sans collection —</option>
+              <option value="">{t('productEdit.noCollection')}</option>
               {collections.map((c) => <option key={c.id} value={c.id}>{c.name_fr}</option>)}
             </FormField>
           </div>
@@ -335,7 +337,7 @@ export default function ProductEditPage() {
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Description</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionDescription')}</h3>
             <div className="flex gap-1 bg-[#111] border border-[#262626] rounded p-0.5">
               {langs.map((l) => (
                 <button key={l} onClick={() => setDescLang(l)} className={`px-3 py-0.5 text-xs rounded transition-colors ${descLang === l ? 'bg-[#262626] text-[#e8e2d6]' : 'text-[#57534e]'}`}>
@@ -344,7 +346,7 @@ export default function ProductEditPage() {
               ))}
             </div>
           </div>
-          <FormField as="textarea" id="prod-desc" label={`Description (${descLang.toUpperCase()})`} rows={4}
+          <FormField as="textarea" id="prod-desc" label={t('productEdit.descriptionLang', { lang: descLang.toUpperCase() })} rows={4}
             value={descLang === 'fr' ? form.description_fr : form.description_en}
             onChange={(e) => {
               const v = (e.target as HTMLTextAreaElement).value;
@@ -356,7 +358,7 @@ export default function ProductEditPage() {
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Matière</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionMaterial')}</h3>
             <div className="flex gap-1 bg-[#111] border border-[#262626] rounded p-0.5">
               {langs.map((l) => (
                 <button key={l} onClick={() => setMatLang(l)} className={`px-3 py-0.5 text-xs rounded transition-colors ${matLang === l ? 'bg-[#262626] text-[#e8e2d6]' : 'text-[#57534e]'}`}>
@@ -365,7 +367,7 @@ export default function ProductEditPage() {
               ))}
             </div>
           </div>
-          <FormField id="prod-material" label={`Matière (${matLang.toUpperCase()})`}
+          <FormField id="prod-material" label={t('productEdit.materialLang', { lang: matLang.toUpperCase() })}
             value={matLang === 'fr' ? form.material_fr : form.material_en}
             onChange={(e) => {
               const v = (e.target as HTMLInputElement).value;
@@ -376,19 +378,19 @@ export default function ProductEditPage() {
         </section>
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Prix</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionPrice')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <FormField id="prod-price" label="Prix (€)" type="number" min="0" step="0.01" value={form.price}
+            <FormField id="prod-price" label={t('productEdit.priceField')} type="number" min="0" step="0.01" value={form.price}
               onChange={(e) => { setForm((f) => ({ ...f, price: parseFloat((e.target as HTMLInputElement).value) || 0 })); setHasChanges(true); }}
             />
-            <FormField id="prod-compare" label="Prix barré (€)" type="number" min="0" step="0.01" value={form.compare_at_price ?? ''}
+            <FormField id="prod-compare" label={t('productEdit.compareField')} type="number" min="0" step="0.01" value={form.compare_at_price ?? ''}
               onChange={(e) => {
                 const v = (e.target as HTMLInputElement).value;
                 setForm((f) => ({ ...f, compare_at_price: v ? parseFloat(v) : null }));
                 setHasChanges(true);
               }}
             />
-            <FormField as="select" id="prod-currency" label="Devise" value={form.currency}
+            <FormField as="select" id="prod-currency" label={t('productEdit.currency')} value={form.currency}
               onChange={(e) => { setForm((f) => ({ ...f, currency: (e.target as HTMLSelectElement).value })); setHasChanges(true); }}
             >
               <option value="EUR">EUR</option>
@@ -399,16 +401,16 @@ export default function ProductEditPage() {
         </section>
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Visibilité</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionVisibility')}</h3>
           <div className="space-y-3">
-            <Toggle id="toggle-new" checked={form.is_new} onChange={(v) => { setForm((f) => ({ ...f, is_new: v })); setHasChanges(true); }} label="Nouveauté" description="Afficher le badge «New» sur le produit" />
-            <Toggle id="toggle-featured" checked={form.is_featured} onChange={(v) => { setForm((f) => ({ ...f, is_featured: v })); setHasChanges(true); }} label="Mis en avant" description="Apparaît dans la sélection homepage" />
-            <Toggle id="toggle-archived" checked={form.is_archived} onChange={(v) => { setForm((f) => ({ ...f, is_archived: v })); setHasChanges(true); }} label="Archivé" description="Masquer le produit de la boutique" />
+            <Toggle id="toggle-new" checked={form.is_new} onChange={(v) => { setForm((f) => ({ ...f, is_new: v })); setHasChanges(true); }} label={t('productEdit.toggleNew')} description={t('productEdit.toggleNewDesc')} />
+            <Toggle id="toggle-featured" checked={form.is_featured} onChange={(v) => { setForm((f) => ({ ...f, is_featured: v })); setHasChanges(true); }} label={t('productEdit.toggleFeatured')} description={t('productEdit.toggleFeaturedDesc')} />
+            <Toggle id="toggle-archived" checked={form.is_archived} onChange={(v) => { setForm((f) => ({ ...f, is_archived: v })); setHasChanges(true); }} label={t('productEdit.toggleArchived')} description={t('productEdit.toggleArchivedDesc')} />
           </div>
         </section>
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Couleurs</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionColors')}</h3>
           {colors.map((color) => (
             <div key={color.id} className="flex items-center gap-3 p-3 bg-[#111] border border-[#262626] rounded">
               <div className="w-6 h-6 rounded-full border border-[#262626] flex-shrink-0" style={{ backgroundColor: color.hex }} />
@@ -420,21 +422,21 @@ export default function ProductEditPage() {
             </div>
           ))}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[#111] border border-dashed border-[#262626] rounded">
-            <FormField id="new-color-fr" label="Label FR" value={newColor.label_fr} onChange={(e) => setNewColor((c) => ({ ...c, label_fr: (e.target as HTMLInputElement).value }))} />
-            <FormField id="new-color-en" label="Label EN" value={newColor.label_en} onChange={(e) => setNewColor((c) => ({ ...c, label_en: (e.target as HTMLInputElement).value }))} />
+            <FormField id="new-color-fr" label={t('productEdit.labelFr')} value={newColor.label_fr} onChange={(e) => setNewColor((c) => ({ ...c, label_fr: (e.target as HTMLInputElement).value }))} />
+            <FormField id="new-color-en" label={t('productEdit.labelEn')} value={newColor.label_en} onChange={(e) => setNewColor((c) => ({ ...c, label_en: (e.target as HTMLInputElement).value }))} />
             <div>
-              <label htmlFor="new-color-hex" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Couleur</label>
+              <label htmlFor="new-color-hex" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('productEdit.color')}</label>
               <input id="new-color-hex" type="color" value={newColor.hex} onChange={(e) => setNewColor((c) => ({ ...c, hex: e.target.value }))} className="w-full h-[34px] bg-[#111] border border-[#262626] rounded cursor-pointer" />
             </div>
             <div className="flex items-end">
-              <button onClick={handleAddColor} className="w-full bg-[#262626] hover:bg-[#333] text-[#e8e2d6] text-xs py-2 rounded transition-colors">Ajouter</button>
+              <button onClick={handleAddColor} className="w-full bg-[#262626] hover:bg-[#333] text-[#e8e2d6] text-xs py-2 rounded transition-colors">{t('common.add')}</button>
             </div>
           </div>
         </section>
 
         {colors.length > 0 && (
           <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Stock par taille</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionStock')}</h3>
             {colors.map((color) => (
               <div key={color.id}>
                 <div className="flex items-center gap-2 mb-2">
@@ -458,7 +460,7 @@ export default function ProductEditPage() {
         )}
 
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Médias</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('productEdit.sectionMedia')}</h3>
           <div className="grid grid-cols-3 gap-3">
             {media.map((item, idx) => (
               <div key={item.id} className="relative group">
@@ -488,15 +490,15 @@ export default function ProductEditPage() {
               onChange={(e) => { void handleUploadFiles(e.target.files); e.target.value = ''; }}
               className="hidden"
             />
-            {uploading ? 'Téléversement…' : '⤓ Téléverser des images depuis l’ordinateur'}
+            {uploading ? t('productEdit.uploading') : t('productEdit.uploadFiles')}
           </label>
           {/* Ou coller une URL */}
           <div className="flex gap-2">
-            <input type="url" placeholder="… ou coller une URL d'image" value={newMediaUrl}
+            <input type="url" placeholder={t('productEdit.mediaUrlPlaceholder')} value={newMediaUrl}
               onChange={(e) => setNewMediaUrl(e.target.value)}
               className="flex-1 bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm px-3 py-2 placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors"
             />
-            <button onClick={handleAddMedia} className="bg-[#262626] hover:bg-[#333] text-[#e8e2d6] text-xs px-4 py-2 rounded transition-colors">Ajouter</button>
+            <button onClick={handleAddMedia} className="bg-[#262626] hover:bg-[#333] text-[#e8e2d6] text-xs px-4 py-2 rounded transition-colors">{t('common.add')}</button>
           </div>
         </section>
       </div>

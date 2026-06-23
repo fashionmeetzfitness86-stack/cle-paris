@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import ConfirmModal from '../components/ConfirmModal';
 import FormField from '../components/FormField';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -9,6 +10,7 @@ import { mockCategories } from '../mockData';
 import type { Category } from '../types';
 
 export default function CategoriesPage() {
+  const { t } = useTranslation('admin');
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [editTarget, setEditTarget] = useState<Category | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
@@ -26,11 +28,11 @@ export default function CategoriesPage() {
       if (svcErr) { setError(svcErr.message); return; }
       if (data) setCategories(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadCategories();
@@ -46,7 +48,7 @@ export default function CategoriesPage() {
       setNewCat({ slug: '', name_fr: '', name_en: '' });
       setShowAddForm(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la création');
+      setError(e instanceof Error ? e.message : t('common.createError'));
     } finally {
       setSaving(false);
     }
@@ -61,7 +63,7 @@ export default function CategoriesPage() {
       if (data) setCategories((c) => c.map((cat) => (cat.id === data.id ? data : cat)));
       setEditTarget(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la mise à jour');
+      setError(e instanceof Error ? e.message : t('common.updateError'));
     } finally {
       setSaving(false);
     }
@@ -75,7 +77,7 @@ export default function CategoriesPage() {
       setCategories((c) => c.filter((cat) => cat.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression');
+      setError(e instanceof Error ? e.message : t('common.deleteError'));
       setDeleteTarget(null);
     }
   };
@@ -85,9 +87,9 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Boutique</p>
-          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Catégories</h2>
-          <p className="text-sm text-[#57534e] mt-0.5">{categories.length} catégorie{categories.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('categories.overline')}</p>
+          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('categories.title')}</h2>
+          <p className="text-sm text-[#57534e] mt-0.5">{t('categories.count', { count: categories.length })}</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
@@ -96,7 +98,7 @@ export default function CategoriesPage() {
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Nouvelle catégorie
+          {t('categories.new')}
         </button>
       </div>
 
@@ -105,17 +107,17 @@ export default function CategoriesPage() {
       {/* Add form */}
       {showAddForm && (
         <div className="bg-[#1a1a1a] border border-dashed border-[#c8b89a]/30 rounded-lg p-5">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-4">Ajouter une catégorie</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-4">{t('categories.addTitle')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <FormField id="new-cat-slug" label="Slug" value={newCat.slug} onChange={(e) => setNewCat((c) => ({ ...c, slug: (e.target as HTMLInputElement).value }))} required />
-            <FormField id="new-cat-fr" label="Nom FR" value={newCat.name_fr} onChange={(e) => setNewCat((c) => ({ ...c, name_fr: (e.target as HTMLInputElement).value }))} required />
-            <FormField id="new-cat-en" label="Nom EN" value={newCat.name_en} onChange={(e) => setNewCat((c) => ({ ...c, name_en: (e.target as HTMLInputElement).value }))} />
+            <FormField id="new-cat-slug" label={t('categories.slug')} value={newCat.slug} onChange={(e) => setNewCat((c) => ({ ...c, slug: (e.target as HTMLInputElement).value }))} required />
+            <FormField id="new-cat-fr" label={t('categories.nameFr')} value={newCat.name_fr} onChange={(e) => setNewCat((c) => ({ ...c, name_fr: (e.target as HTMLInputElement).value }))} required />
+            <FormField id="new-cat-en" label={t('categories.nameEn')} value={newCat.name_en} onChange={(e) => setNewCat((c) => ({ ...c, name_en: (e.target as HTMLInputElement).value }))} />
           </div>
           <div className="flex gap-2">
             <button onClick={handleAdd} disabled={saving} className="bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f] text-xs font-semibold px-4 py-2 rounded transition-colors disabled:opacity-60">
-              {saving ? 'Ajout…' : 'Ajouter'}
+              {saving ? t('common.adding') : t('common.add')}
             </button>
-            <button onClick={() => setShowAddForm(false)} className="text-xs text-[#57534e] hover:text-[#a8a29e] px-4 py-2 border border-[#262626] rounded transition-colors">Annuler</button>
+            <button onClick={() => setShowAddForm(false)} className="text-xs text-[#57534e] hover:text-[#a8a29e] px-4 py-2 border border-[#262626] rounded transition-colors">{t('common.cancel')}</button>
           </div>
         </div>
       )}
@@ -125,13 +127,13 @@ export default function CategoriesPage() {
         {loading ? (
           <LoadingSpinner />
         ) : categories.length === 0 ? (
-          <EmptyState title="Aucune catégorie créée" description="Ajoutez votre première catégorie ci-dessus." />
+          <EmptyState title={t('categories.emptyTitle')} description={t('categories.emptyDesc')} />
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#262626]">
-                {['Slug', 'Nom FR', 'Nom EN', 'Actions'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
+                {[t('categories.col.slug'), t('categories.col.nameFr'), t('categories.col.nameEn'), t('categories.col.actions')].map((h, i) => (
+                  <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -152,9 +154,9 @@ export default function CategoriesPage() {
                       <td className="px-4 py-2">
                         <div className="flex gap-2">
                           <button onClick={handleSaveEdit} disabled={saving} className="text-xs text-green-400 hover:text-green-300 transition-colors disabled:opacity-60">
-                            {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+                            {saving ? t('common.saving') : t('common.save')}
                           </button>
-                          <button onClick={() => setEditTarget(null)} className="text-xs text-[#57534e] hover:text-[#a8a29e] transition-colors">Annuler</button>
+                          <button onClick={() => setEditTarget(null)} className="text-xs text-[#57534e] hover:text-[#a8a29e] transition-colors">{t('common.cancel')}</button>
                         </div>
                       </td>
                     </>
@@ -165,8 +167,8 @@ export default function CategoriesPage() {
                       <td className="px-4 py-3 text-sm text-[#a8a29e]">{cat.name_en}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">
-                          <button onClick={() => setEditTarget(cat)} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">Modifier</button>
-                          <button onClick={() => setDeleteTarget(cat)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">Suppr.</button>
+                          <button onClick={() => setEditTarget(cat)} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">{t('common.edit')}</button>
+                          <button onClick={() => setDeleteTarget(cat)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">{t('common.deleteShort')}</button>
                         </div>
                       </td>
                     </>
@@ -180,9 +182,9 @@ export default function CategoriesPage() {
 
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Supprimer la catégorie"
-        message={`Supprimer "${deleteTarget?.name_fr}" ?`}
-        confirmLabel="Supprimer"
+        title={t('categories.deleteTitle')}
+        message={t('categories.deleteMessage', { name: deleteTarget?.name_fr })}
+        confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         danger

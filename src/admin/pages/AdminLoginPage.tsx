@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { isMockMode } from '../../lib/supabase';
 import { signIn } from '../lib/auth';
 import { updateLastLogin } from '../services/adminUsers';
@@ -7,6 +8,7 @@ import { updateLastLogin } from '../services/adminUsers';
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('admin');
   const from = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? '/admin';
 
   const [email, setEmail] = useState('');
@@ -19,7 +21,7 @@ export default function AdminLoginPage() {
     setError('');
 
     if (!email.trim() || !password.trim()) {
-      setError('Veuillez remplir tous les champs.');
+      setError(t('login.errorRequired'));
       return;
     }
 
@@ -41,9 +43,9 @@ export default function AdminLoginPage() {
     if (authError) {
       const msg = authError.message.toLowerCase();
       if (msg.includes('invalid') || msg.includes('credentials')) {
-        setError('Identifiants incorrects. Vérifiez votre e-mail et mot de passe.');
+        setError(t('login.errorInvalid'));
       } else if (msg.includes('rate')) {
-        setError('Trop de tentatives. Réessayez dans quelques minutes.');
+        setError(t('login.errorRate'));
       } else {
         setError(authError.message);
       }
@@ -74,26 +76,26 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div className="text-center mb-10">
           <span className="text-[11px] uppercase tracking-[0.4em] text-[#e8e2d6] font-display font-semibold block mb-1">
-            CLÉ PARIS
+            {t('login.brand')}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[#57534e]">Administration</span>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-[#57534e]">{t('login.subtitle')}</span>
         </div>
 
         {/* Card */}
         <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-8">
-          <h2 className="text-[#e8e2d6] font-display font-semibold text-lg mb-1">Connexion</h2>
-          <p className="text-[#57534e] text-sm mb-6">Accès réservé aux administrateurs</p>
+          <h2 className="text-[#e8e2d6] font-display font-semibold text-lg mb-1">{t('login.title')}</h2>
+          <p className="text-[#57534e] text-sm mb-6">{t('login.intro')}</p>
 
           {isMockMode() && (
             <div className="mb-4 rounded border border-[#c8b89a]/20 bg-[#c8b89a]/5 px-3 py-2 text-[10px] text-[#c8b89a] uppercase tracking-widest">
-              Mode développement — Supabase non connecté
+              {t('login.devMode')}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="login-email" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">
-                Adresse e-mail
+                {t('login.email')}
               </label>
               <input
                 id="login-email"
@@ -107,7 +109,7 @@ export default function AdminLoginPage() {
             </div>
             <div>
               <label htmlFor="login-password" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">
-                Mot de passe
+                {t('login.password')}
               </label>
               <input
                 id="login-password"
@@ -134,10 +136,10 @@ export default function AdminLoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Connexion…
+                  {t('login.submitting')}
                 </span>
               ) : (
-                'Se connecter'
+                t('login.submit')
               )}
             </button>
           </form>
@@ -145,7 +147,7 @@ export default function AdminLoginPage() {
 
         {isMockMode() && (
           <p className="text-center mt-6 text-[10px] text-[#57534e]">
-            Mode dev — Entrez n'importe quel e-mail et mot de passe.
+            {t('login.devHint')}
           </p>
         )}
       </div>

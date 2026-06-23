@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 interface ErrorBannerProps {
   message: string;
   onDismiss?: () => void;
 }
 
 export default function ErrorBanner({ message, onDismiss }: ErrorBannerProps) {
+  const { t } = useTranslation("admin");
   return (
     <div className="flex items-start gap-3 rounded-lg border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm text-[#f87171]">
       <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 flex-shrink-0 mt-0.5">
@@ -18,7 +21,7 @@ export default function ErrorBanner({ message, onDismiss }: ErrorBannerProps) {
         <button
           onClick={onDismiss}
           className="text-[#f87171]/60 hover:text-[#f87171] transition-colors"
-          aria-label="Dismiss"
+          aria-label={t("common.dismiss")}
         >
           ✕
         </button>

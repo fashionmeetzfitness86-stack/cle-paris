@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
 import SaveBar from '../components/SaveBar';
@@ -24,6 +25,7 @@ function SettingInput({ setting, onChange }: { setting: StoreSetting; onChange: 
 }
 
 export default function SettingsPage() {
+  const { t } = useTranslation('admin');
   const [settings, setSettings] = useState<StoreSetting[]>(mockStoreSettings);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -66,8 +68,8 @@ export default function SettingsPage() {
   return (
     <div className="p-6 pb-24 max-w-2xl">
       <div className="mb-6">
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Configuration</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Paramètres</h2>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('settings.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('settings.title')}</h2>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}

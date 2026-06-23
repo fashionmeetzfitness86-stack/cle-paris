@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
@@ -11,17 +12,18 @@ import type { Order, OrderStatus } from '../types';
 
 const PAGE_SIZE = 20;
 
-const STATUS_FILTERS: { value: 'all' | OrderStatus; label: string }[] = [
-  { value: 'all', label: 'Toutes' },
-  { value: 'pending', label: 'En attente' },
-  { value: 'paid', label: 'Payées' },
-  { value: 'shipped', label: 'Expédiées' },
-  { value: 'delivered', label: 'Livrées' },
-  { value: 'refunded', label: 'Remboursées' },
-  { value: 'cancelled', label: 'Annulées' },
+const STATUS_FILTER_VALUES: ('all' | OrderStatus)[] = [
+  'all', 'pending', 'paid', 'shipped', 'delivered', 'refunded', 'cancelled',
 ];
 
 export default function OrdersPage() {
+  const { t, i18n } = useTranslation('admin');
+  const dateLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
+  const numberLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
+  const statusFilters: { value: 'all' | OrderStatus; label: string }[] = STATUS_FILTER_VALUES.map((value) => ({
+    value,
+    label: t(`orders.filter.${value}`),
+  }));
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [total, setTotal] = useState<number>(mockOrders.length);
   const [filter, setFilter] = useState<'all' | OrderStatus>('all');
@@ -33,8 +35,8 @@ export default function OrdersPage() {
 
   // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
   }, [search]);
 
   const loadOrders = useCallback(async () => {
@@ -53,11 +55,11 @@ export default function OrdersPage() {
         setTotal(data.length < PAGE_SIZE ? page * PAGE_SIZE + data.length : page * PAGE_SIZE + PAGE_SIZE + 1);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [page, filter, debouncedSearch]);
+  }, [page, filter, debouncedSearch, t]);
 
   useEffect(() => {
     setPage(0);
@@ -70,9 +72,9 @@ export default function OrdersPage() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Commerce</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Commandes</h2>
-        <p className="text-sm text-[#57534e] mt-0.5">{total} commande{total !== 1 ? 's' : ''}</p>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('orders.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('orders.title')}</h2>
+        <p className="text-sm text-[#57534e] mt-0.5">{t('orders.count', { count: total })}</p>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
@@ -80,7 +82,7 @@ export default function OrdersPage() {
       {/* Filters */}
       <div className="space-y-3">
         <div className="flex flex-wrap gap-1 bg-[#1a1a1a] border border-[#262626] rounded p-1 w-fit">
-          {STATUS_FILTERS.map((f) => (
+          {statusFilters.map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
@@ -99,7 +101,7 @@ export default function OrdersPage() {
           </svg>
           <input
             type="text"
-            placeholder="Rechercher par e-mail ou numéro…"
+            placeholder={t('orders.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm pl-9 pr-3 py-2 placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors"
@@ -113,15 +115,15 @@ export default function OrdersPage() {
           <LoadingSpinner />
         ) : orders.length === 0 ? (
           <EmptyState
-            title="Aucune commande trouvée"
-            description="Essayez de modifier vos filtres de recherche."
+            title={t('orders.emptyTitle')}
+            description={t('orders.emptyDesc')}
           />
         ) : (
           <>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#262626]">
-                  {['Commande', 'Client', 'Date', 'Statut', 'Total', ''].map((h, i) => (
+                  {[t('orders.col.order'), t('orders.col.customer'), t('orders.col.date'), t('orders.col.status'), t('orders.col.total'), ''].map((h, i) => (
                     <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                   ))}
                 </tr>
@@ -134,20 +136,20 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-[#a8a29e]">{order.customer_email}</td>
                     <td className="px-4 py-3 text-sm text-[#57534e]">
-                      {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(order.created_at).toLocaleDateString(dateLocale)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={order.status} />
                     </td>
                     <td className="px-4 py-3 text-sm text-[#e8e2d6] font-medium">
-                      €{order.total.toLocaleString('fr-FR')}
+                      €{order.total.toLocaleString(numberLocale)}
                     </td>
                     <td className="px-4 py-3">
                       <Link
                         to={`/admin/orders/${order.id}`}
                         className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30"
                       >
-                        Voir
+                        {t('common.view')}
                       </Link>
                     </td>
                   </tr>

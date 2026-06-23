@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Badge from '../components/Badge';
 import ConfirmModal from '../components/ConfirmModal';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -13,6 +14,8 @@ import type { BlogPost } from '../types';
 const PAGE_SIZE = 10;
 
 export default function BlogPage() {
+  const { t, i18n } = useTranslation('admin');
+  const dateLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
   const [posts, setPosts] = useState<BlogPost[]>(mockBlogPosts);
   const [total, setTotal] = useState<number>(mockBlogPosts.length);
   const [page, setPage] = useState(0);
@@ -34,11 +37,11 @@ export default function BlogPage() {
         setTotal(data.length < PAGE_SIZE ? page * PAGE_SIZE + data.length : page * PAGE_SIZE + PAGE_SIZE + 1);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, t]);
 
   useEffect(() => {
     loadPosts();
@@ -52,7 +55,7 @@ export default function BlogPage() {
       setDeleteTarget(null);
       await loadPosts();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression');
+      setError(e instanceof Error ? e.message : t('common.deleteError'));
       setDeleteTarget(null);
     }
   };
@@ -61,9 +64,9 @@ export default function BlogPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Contenu</p>
-          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Blog / Journal</h2>
-          <p className="text-sm text-[#57534e] mt-0.5">{total} article{total !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('blog.overline')}</p>
+          <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('blog.title')}</h2>
+          <p className="text-sm text-[#57534e] mt-0.5">{t('blog.count', { count: total })}</p>
         </div>
         <Link
           to="/admin/blog/new"
@@ -72,7 +75,7 @@ export default function BlogPage() {
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
             <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-          Nouvel article
+          {t('blog.new')}
         </Link>
       </div>
 
@@ -83,11 +86,11 @@ export default function BlogPage() {
           <LoadingSpinner />
         ) : posts.length === 0 ? (
           <EmptyState
-            title="Aucun article rédigé"
-            description="Commencez à rédiger votre premier article."
+            title={t('blog.emptyTitle')}
+            description={t('blog.emptyDesc')}
             action={
               <Link to="/admin/blog/new" className="text-xs text-[#c8b89a] hover:text-[#e8e2d6] transition-colors">
-                + Nouvel article
+                {t('blog.emptyAction')}
               </Link>
             }
           />
@@ -96,8 +99,8 @@ export default function BlogPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#262626]">
-                  {['Titre', 'Statut', 'Date de publication', 'Actions'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
+                  {[t('blog.col.title'), t('blog.col.status'), t('blog.col.publishedAt'), t('blog.col.actions')].map((h, i) => (
+                    <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -121,12 +124,12 @@ export default function BlogPage() {
                       <Badge variant={post.is_published ? 'published' : 'draft'} />
                     </td>
                     <td className="px-4 py-3 text-sm text-[#57534e]">
-                      {post.published_at ? new Date(post.published_at).toLocaleDateString('fr-FR') : '—'}
+                      {post.published_at ? new Date(post.published_at).toLocaleDateString(dateLocale) : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <Link to={`/admin/blog/${post.id}`} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">Modifier</Link>
-                        <button onClick={() => setDeleteTarget(post)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">Suppr.</button>
+                        <Link to={`/admin/blog/${post.id}`} className="text-xs text-[#57534e] hover:text-[#c8b89a] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#c8b89a]/30">{t('common.edit')}</Link>
+                        <button onClick={() => setDeleteTarget(post)} className="text-xs text-[#57534e] hover:text-[#f87171] transition-colors px-2 py-1 border border-[#262626] rounded hover:border-[#f87171]/30">{t('common.deleteShort')}</button>
                       </div>
                     </td>
                   </tr>
@@ -140,9 +143,9 @@ export default function BlogPage() {
 
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Supprimer l'article"
-        message={`Supprimer "${deleteTarget?.title_fr}" ?`}
-        confirmLabel="Supprimer"
+        title={t('blog.deleteTitle')}
+        message={t('blog.deleteMessage', { name: deleteTarget?.title_fr })}
+        confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
         danger

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
@@ -7,17 +8,17 @@ import { getOrder, updateOrderStatus } from '../services/orders';
 import { mockOrders } from '../mockData';
 import type { Order, OrderStatus } from '../types';
 
-const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: 'pending', label: 'En attente' },
-  { value: 'paid', label: 'Payé' },
-  { value: 'processing', label: 'Traitement' },
-  { value: 'shipped', label: 'Expédié' },
-  { value: 'delivered', label: 'Livré' },
-  { value: 'refunded', label: 'Remboursé' },
-  { value: 'cancelled', label: 'Annulé' },
+const STATUS_OPTION_VALUES: OrderStatus[] = [
+  'pending', 'paid', 'processing', 'shipped', 'delivered', 'refunded', 'cancelled',
 ];
 
 export default function OrderDetailPage() {
+  const { t, i18n } = useTranslation('admin');
+  const dateLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
+  const statusOptions: { value: OrderStatus; label: string }[] = STATUS_OPTION_VALUES.map((value) => ({
+    value,
+    label: t(`orderDetail.statusOption.${value}`),
+  }));
   const { id } = useParams<{ id: string }>();
   const fallback = mockOrders.find((o) => o.id === id) ?? null;
 
@@ -40,11 +41,11 @@ export default function OrderDetailPage() {
         setStatus(data.status);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     loadOrder();
@@ -61,7 +62,7 @@ export default function OrderDetailPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la mise à jour');
+      setError(e instanceof Error ? e.message : t('common.updateError'));
     } finally {
       setSaving(false);
     }
@@ -72,8 +73,8 @@ export default function OrderDetailPage() {
   if (!order) {
     return (
       <div className="p-6">
-        <p className="text-[#57534e]">Commande introuvable.</p>
-        <Link to="/admin/orders" className="text-sm text-[#c8b89a] mt-2 block">← Retour aux commandes</Link>
+        <p className="text-[#57534e]">{t('orderDetail.notFound')}</p>
+        <Link to="/admin/orders" className="text-sm text-[#c8b89a] mt-2 block">{t('orderDetail.back')}</Link>
       </div>
     );
   }
@@ -96,7 +97,7 @@ export default function OrderDetailPage() {
             <Badge variant={order.status} />
           </div>
           <p className="text-sm text-[#57534e] mt-0.5">
-            {new Date(order.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {new Date(order.created_at).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
       </div>
@@ -108,13 +109,13 @@ export default function OrderDetailPage() {
         <div className="md:col-span-2 space-y-5">
           <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-[#262626]">
-              <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Articles commandés</h3>
+              <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('orderDetail.items')}</h3>
             </div>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#262626]">
-                  {['Produit', 'Taille / Couleur', 'Qté', 'Prix'].map((h) => (
-                    <th key={h} className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
+                  {[t('orderDetail.col.product'), t('orderDetail.col.sizeColor'), t('orderDetail.col.qty'), t('orderDetail.col.price')].map((h, i) => (
+                    <th key={i} className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -142,7 +143,7 @@ export default function OrderDetailPage() {
 
           {/* Customer info */}
           <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-4">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">Informations client</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">{t('orderDetail.customerInfo')}</h3>
             <p className="text-sm text-[#e8e2d6] mb-1">{order.customer_email}</p>
             {order.shipping_address && (
               <div className="text-xs text-[#a8a29e] space-y-0.5 mt-2">
@@ -160,13 +161,13 @@ export default function OrderDetailPage() {
         <div className="space-y-4">
           {/* Status */}
           <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-4">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">Statut</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">{t('orderDetail.status')}</h3>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as OrderStatus)}
               className="w-full bg-[#111] border border-[#262626] rounded text-[#e8e2d6] text-sm px-3 py-2 focus:outline-none focus:border-[#c8b89a] transition-colors mb-3"
             >
-              {STATUS_OPTIONS.map((opt) => (
+              {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -179,24 +180,24 @@ export default function OrderDetailPage() {
                   : 'bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f]'
               }`}
             >
-              {saving ? 'Mise à jour…' : saved ? '✓ Mis à jour' : 'Mettre à jour'}
+              {saving ? t('common.updating') : saved ? t('common.updated') : t('common.update')}
             </button>
           </div>
 
           {/* Summary */}
           <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-4">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">Résumé</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e] mb-3">{t('orderDetail.summary')}</h3>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-[#a8a29e]">Sous-total</span>
+                <span className="text-[#a8a29e]">{t('orderDetail.subtotal')}</span>
                 <span className="text-[#e8e2d6]">€{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-[#a8a29e]">Livraison</span>
-                <span className="text-[#e8e2d6]">{shipping === 0 ? 'Offerte' : `€${shipping.toFixed(2)}`}</span>
+                <span className="text-[#a8a29e]">{t('orderDetail.shipping')}</span>
+                <span className="text-[#e8e2d6]">{shipping === 0 ? t('orderDetail.shippingFree') : `€${shipping.toFixed(2)}`}</span>
               </div>
               <div className="border-t border-[#262626] pt-2 flex justify-between text-sm font-semibold">
-                <span className="text-[#a8a29e]">Total</span>
+                <span className="text-[#a8a29e]">{t('orderDetail.total')}</span>
                 <span className="text-[#e8e2d6]">€{order.total.toFixed(2)}</span>
               </div>
             </div>

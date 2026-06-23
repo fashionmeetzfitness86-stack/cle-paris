@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
 import EmptyState from '../components/EmptyState';
@@ -10,6 +11,7 @@ import type { I18nEntry } from '../types';
 type Lang = 'fr' | 'en';
 
 export default function I18nEditorPage() {
+  const { t } = useTranslation('admin');
   const [entries, setEntries] = useState<I18nEntry[]>(mockI18nEntries);
   const [modified, setModified] = useState<Record<string, I18nEntry>>({});
   const [filterNs, setFilterNs] = useState('');
@@ -59,22 +61,22 @@ export default function I18nEditorPage() {
   return (
     <div className="p-6 pb-24">
       <div className="mb-6">
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Configuration</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Traductions</h2>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('i18n.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('i18n.title')}</h2>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       {/* Namespace filter */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <button onClick={() => setFilterNs('')} className={`px-3 py-1 text-xs rounded border transition-colors ${filterNs === '' ? 'border-[#c8b89a] text-[#c8b89a]' : 'border-[#262626] text-[#57534e] hover:border-[#333]'}`}>Tous</button>
+        <button onClick={() => setFilterNs('')} className={`px-3 py-1 text-xs rounded border transition-colors ${filterNs === '' ? 'border-[#c8b89a] text-[#c8b89a]' : 'border-[#262626] text-[#57534e] hover:border-[#333]'}`}>{t('i18n.filterAll')}</button>
         {namespaces.map((ns) => (
           <button key={ns} onClick={() => setFilterNs(ns)} className={`px-3 py-1 text-xs rounded border transition-colors ${filterNs === ns ? 'border-[#c8b89a] text-[#c8b89a]' : 'border-[#262626] text-[#57534e] hover:border-[#333]'}`}>{ns}</button>
         ))}
       </div>
 
       {entries.length === 0 ? (
-        <EmptyState title="Aucune entrée" description="Les clés de traduction s'afficheront ici." />
+        <EmptyState title={t('i18n.emptyTitle')} description={t('i18n.emptyDesc')} />
       ) : (
         <div className="space-y-6">
           {Object.entries(grouped).map(([ns, nsEntries]) => (

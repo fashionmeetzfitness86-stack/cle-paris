@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
 import EmptyState from '../components/EmptyState';
@@ -10,6 +11,7 @@ import type { LegalPage } from '../types';
 type Lang = 'fr' | 'en';
 
 export default function LegalEditorPage() {
+  const { t } = useTranslation('admin');
   const [pages, setPages] = useState<LegalPage[]>(mockLegalPages);
   const [selectedId, setSelectedId] = useState<string>(mockLegalPages[0]?.id ?? '');
   const [editLang, setEditLang] = useState<Lang>('fr');
@@ -52,14 +54,14 @@ export default function LegalEditorPage() {
   return (
     <div className="p-6 pb-24">
       <div className="mb-6">
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Contenu</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Mentions légales</h2>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('legal.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('legal.title')}</h2>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       {pages.length === 0 ? (
-        <EmptyState title="Aucune page légale" />
+        <EmptyState title={t('legal.emptyTitle')} />
       ) : (
         <div className="grid md:grid-cols-3 gap-4">
           {/* Page list */}
@@ -87,7 +89,7 @@ export default function LegalEditorPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Titre ({editLang.toUpperCase()})</label>
+                <label className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('legal.fieldTitle', { lang: editLang.toUpperCase() })}</label>
                 <input
                   value={editLang === 'fr' ? selected.title_fr : selected.title_en}
                   onChange={(e) => updateField(editLang === 'fr' ? 'title_fr' : 'title_en', e.target.value)}
@@ -95,7 +97,7 @@ export default function LegalEditorPage() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Contenu ({editLang.toUpperCase()})</label>
+                <label className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('legal.fieldContent', { lang: editLang.toUpperCase() })}</label>
                 <textarea
                   rows={12}
                   value={editLang === 'fr' ? selected.body_fr : selected.body_en}

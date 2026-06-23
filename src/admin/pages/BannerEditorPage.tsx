@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Toggle from '../components/Toggle';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBanner from '../components/ErrorBanner';
@@ -9,6 +10,7 @@ import { mockBanner } from '../mockData';
 import type { Banner } from '../types';
 
 export default function BannerEditorPage() {
+  const { t } = useTranslation('admin');
   const [banner, setBanner] = useState<Banner>(mockBanner);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,8 +46,8 @@ export default function BannerEditorPage() {
   return (
     <div className="p-6 space-y-6 max-w-2xl pb-24">
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Contenu</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Bannière</h2>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('banner.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('banner.title')}</h2>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
@@ -55,7 +57,7 @@ export default function BannerEditorPage() {
         className="rounded-lg px-4 py-2 text-sm text-center font-medium transition-all"
         style={{ backgroundColor: banner.background_color, color: banner.text_color }}
       >
-        {banner.message_fr || 'Aperçu bannière'}
+        {banner.message_fr || t('banner.preview')}
       </div>
 
       <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-5">
@@ -63,13 +65,13 @@ export default function BannerEditorPage() {
           id="banner-active"
           checked={banner.is_active}
           onChange={(v) => set('is_active', v)}
-          label="Bannière active"
-          description="Afficher la bannière sur le site"
+          label={t('banner.toggleActive')}
+          description={t('banner.toggleActiveDesc')}
         />
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="banner-msg-fr" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Message FR</label>
+            <label htmlFor="banner-msg-fr" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('banner.messageFr')}</label>
             <input
               id="banner-msg-fr"
               value={banner.message_fr}
@@ -78,7 +80,7 @@ export default function BannerEditorPage() {
             />
           </div>
           <div>
-            <label htmlFor="banner-msg-en" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Message EN</label>
+            <label htmlFor="banner-msg-en" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('banner.messageEn')}</label>
             <input
               id="banner-msg-en"
               value={banner.message_en}
@@ -87,7 +89,7 @@ export default function BannerEditorPage() {
             />
           </div>
           <div>
-            <label htmlFor="banner-link" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Lien</label>
+            <label htmlFor="banner-link" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('banner.link')}</label>
             <input
               id="banner-link"
               value={banner.link}
@@ -97,14 +99,14 @@ export default function BannerEditorPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="banner-bg" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Fond</label>
+              <label htmlFor="banner-bg" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('banner.background')}</label>
               <div className="flex gap-2 items-center">
                 <input id="banner-bg" type="color" value={banner.background_color} onChange={(e) => set('background_color', e.target.value)} className="w-10 h-10 bg-[#111] border border-[#262626] rounded cursor-pointer" />
                 <span className="text-sm text-[#a8a29e] font-mono">{banner.background_color}</span>
               </div>
             </div>
             <div>
-              <label htmlFor="banner-text-color" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">Texte</label>
+              <label htmlFor="banner-text-color" className="block text-[10px] uppercase tracking-widest text-[#a8a29e] mb-1.5">{t('banner.textColor')}</label>
               <div className="flex gap-2 items-center">
                 <input id="banner-text-color" type="color" value={banner.text_color} onChange={(e) => set('text_color', e.target.value)} className="w-10 h-10 bg-[#111] border border-[#262626] rounded cursor-pointer" />
                 <span className="text-sm text-[#a8a29e] font-mono">{banner.text_color}</span>

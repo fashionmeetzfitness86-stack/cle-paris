@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 interface PaginationProps {
   page: number;
   pageSize: number;
@@ -6,6 +8,7 @@ interface PaginationProps {
 }
 
 export default function Pagination({ page, pageSize, total, onPageChange }: PaginationProps) {
+  const { t } = useTranslation("admin");
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1) return null;
 
@@ -15,14 +18,14 @@ export default function Pagination({ page, pageSize, total, onPageChange }: Pagi
   return (
     <div className="flex items-center justify-between border-t border-[#262626] px-4 py-3">
       <p className="text-xs text-[#57534e]">
-        {start}–{end} sur {total}
+        {t("common.paginationRange", { start, end, total })}
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
           className="w-7 h-7 flex items-center justify-center rounded text-xs text-[#57534e] hover:text-[#a8a29e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Page précédente"
+          aria-label={t("common.previousPage")}
         >
           ‹
         </button>
@@ -46,7 +49,7 @@ export default function Pagination({ page, pageSize, total, onPageChange }: Pagi
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
           className="w-7 h-7 flex items-center justify-center rounded text-xs text-[#57534e] hover:text-[#a8a29e] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Page suivante"
+          aria-label={t("common.nextPage")}
         >
           ›
         </button>

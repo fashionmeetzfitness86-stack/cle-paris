@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import StatCard from '../components/StatCard';
 import Badge from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -12,6 +13,8 @@ import { listProducts } from '../services/products';
 import type { Order } from '../types';
 
 export default function DashboardPage() {
+  const { t, i18n } = useTranslation('admin');
+  const locale = i18n.language?.startsWith('en') ? 'en-US' : 'fr-FR';
   // Start empty/zero — never seed real-looking numbers from mock data.
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
@@ -45,7 +48,7 @@ export default function DashboardPage() {
       setActivity(actEntries);
     } catch (e) {
       // Surface the failure instead of masking it with believable fake KPIs.
-      setError(e instanceof Error ? e.message : 'Impossible de charger les statistiques.');
+      setError(e instanceof Error ? e.message : t('dashboard.loadError'));
     } finally {
       setLoading(false);
     }
@@ -59,8 +62,8 @@ export default function DashboardPage() {
     <div className="p-6 space-y-8">
       {/* Page header */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">Vue d'ensemble</p>
-        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">Dashboard</h2>
+        <p className="text-[10px] uppercase tracking-widest text-[#57534e] mb-1">{t('dashboard.overline')}</p>
+        <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">{t('dashboard.title')}</h2>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
@@ -69,9 +72,9 @@ export default function DashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Commandes"
+          label={t('dashboard.statOrders')}
           value={orderCount}
-          delta="ce mois"
+          delta={t('dashboard.statOrdersDelta')}
           positive
           accent
           icon={
@@ -83,8 +86,8 @@ export default function DashboardPage() {
           }
         />
         <StatCard
-          label="Revenu du mois"
-          value={`€${revenue.toLocaleString('fr-FR')}`}
+          label={t('dashboard.statRevenue')}
+          value={`€${revenue.toLocaleString(locale)}`}
           icon={
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
               <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm1 10H7V8H5.5V6.5L8 4l2.5 2.5H9V11z" />
@@ -92,7 +95,7 @@ export default function DashboardPage() {
           }
         />
         <StatCard
-          label="Produits actifs"
+          label={t('dashboard.statProducts')}
           value={productCount}
           icon={
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
@@ -104,7 +107,7 @@ export default function DashboardPage() {
           }
         />
         <StatCard
-          label="Clients"
+          label={t('dashboard.statCustomers')}
           value={customerCount}
           positive
           icon={
@@ -120,21 +123,21 @@ export default function DashboardPage() {
       <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#262626]">
           <div>
-            <h3 className="text-sm font-display font-semibold text-[#e8e2d6]">Commandes récentes</h3>
-            <p className="text-xs text-[#57534e] mt-0.5">5 dernières commandes</p>
+            <h3 className="text-sm font-display font-semibold text-[#e8e2d6]">{t('dashboard.recentOrders')}</h3>
+            <p className="text-xs text-[#57534e] mt-0.5">{t('dashboard.recentOrdersSub')}</p>
           </div>
           <Link
             to="/admin/orders"
             className="text-[10px] uppercase tracking-widest text-[#c8b89a] hover:text-[#e8e2d6] transition-colors"
           >
-            Voir tout →
+            {t('common.viewAll')}
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#262626]">
-                {['Commande', 'Client', 'Date', 'Statut', 'Total'].map((h) => (
+                {[t('dashboard.col.order'), t('dashboard.col.customer'), t('dashboard.col.date'), t('dashboard.col.status'), t('dashboard.col.total')].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-[10px] uppercase tracking-widest text-[#57534e]">{h}</th>
                 ))}
               </tr>
@@ -149,13 +152,13 @@ export default function DashboardPage() {
                   </td>
                   <td className="px-5 py-3 text-sm text-[#a8a29e]">{order.customer_email}</td>
                   <td className="px-5 py-3 text-sm text-[#57534e]">
-                    {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                    {new Date(order.created_at).toLocaleDateString(locale)}
                   </td>
                   <td className="px-5 py-3">
                     <Badge variant={order.status} />
                   </td>
                   <td className="px-5 py-3 text-sm text-[#e8e2d6] font-medium">
-                    €{order.total.toLocaleString('fr-FR')}
+                    €{order.total.toLocaleString(locale)}
                   </td>
                 </tr>
               ))}
@@ -168,8 +171,8 @@ export default function DashboardPage() {
       {activity.length > 0 && (
         <div className="bg-[#1a1a1a] border border-[#262626] rounded-lg overflow-hidden">
           <div className="px-5 py-4 border-b border-[#262626]">
-            <h3 className="text-sm font-display font-semibold text-[#e8e2d6]">Activité récente</h3>
-            <p className="text-xs text-[#57534e] mt-0.5">10 dernières actions</p>
+            <h3 className="text-sm font-display font-semibold text-[#e8e2d6]">{t('dashboard.activity')}</h3>
+            <p className="text-xs text-[#57534e] mt-0.5">{t('dashboard.activitySub')}</p>
           </div>
           <ul className="divide-y divide-[#1f1f1f]">
             {activity.map((entry) => (
@@ -181,7 +184,7 @@ export default function DashboardPage() {
                   <span className="text-sm text-[#a8a29e]">{entry.action}</span>
                 </div>
                 <span className="text-xs text-[#57534e] whitespace-nowrap">
-                  {new Date(entry.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(entry.created_at).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </li>
             ))}
@@ -204,8 +207,8 @@ export default function DashboardPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#e8e2d6]">Gérer les produits</p>
-            <p className="text-xs text-[#57534e] mt-0.5">{productCount} produits actifs</p>
+            <p className="text-sm font-semibold text-[#e8e2d6]">{t('dashboard.manageProducts')}</p>
+            <p className="text-xs text-[#57534e] mt-0.5">{t('dashboard.manageProductsSub', { count: productCount })}</p>
           </div>
         </Link>
         <Link
@@ -220,8 +223,8 @@ export default function DashboardPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#e8e2d6]">Bibliothèque médias</p>
-            <p className="text-xs text-[#57534e] mt-0.5">Fichiers uploadés</p>
+            <p className="text-sm font-semibold text-[#e8e2d6]">{t('dashboard.mediaLibrary')}</p>
+            <p className="text-xs text-[#57534e] mt-0.5">{t('dashboard.mediaLibrarySub')}</p>
           </div>
         </Link>
       </div>

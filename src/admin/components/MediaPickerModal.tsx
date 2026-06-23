@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { listMediaItems, uploadMedia } from "../services/media";
 import type { MediaItem } from "../types";
 import LoadingSpinner from "./LoadingSpinner";
@@ -19,6 +20,7 @@ export default function MediaPickerModal({
   onSelect,
   filter = "all",
 }: MediaPickerModalProps) {
+  const { t } = useTranslation("admin");
   const [items,    setItems]    = useState<MediaItem[]>([]);
   const [loading,  setLoading]  = useState(false);
   const [uploading,setUploading]= useState(false);
@@ -90,8 +92,8 @@ export default function MediaPickerModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e1e1e]">
           <div>
-            <h3 className="text-sm font-semibold text-[#e8e2d6]">Bibliothèque médias</h3>
-            <p className="text-[10px] text-[#57534e] mt-0.5">Sélectionnez un fichier</p>
+            <h3 className="text-sm font-semibold text-[#e8e2d6]">{t("media.title")}</h3>
+            <p className="text-[10px] text-[#57534e] mt-0.5">{t("media.selectFile")}</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -99,7 +101,7 @@ export default function MediaPickerModal({
               disabled={uploading}
               className="text-xs bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f] font-semibold px-3 py-1.5 rounded transition-colors disabled:opacity-60"
             >
-              {uploading ? "Envoi…" : "+ Uploader"}
+              {uploading ? t("media.uploading") : t("media.upload")}
             </button>
             <button
               onClick={onClose}
@@ -130,12 +132,12 @@ export default function MediaPickerModal({
                   : "border-[#262626] text-[#57534e] hover:border-[#333]"
               }`}
             >
-              {f === "all" ? "Tous" : f === "image" ? "Images" : "Vidéos"}
+              {f === "all" ? t("media.filterAll") : f === "image" ? t("media.filterImages") : t("media.filterVideos")}
             </button>
           ))}
           <input
             type="text"
-            placeholder="Rechercher…"
+            placeholder={t("common.search") + "…"}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="ml-auto text-xs bg-[#1a1a1a] border border-[#262626] rounded px-3 py-1.5 text-[#e8e2d6] placeholder-[#57534e] focus:outline-none focus:border-[#c8b89a] transition-colors w-44"
@@ -148,7 +150,7 @@ export default function MediaPickerModal({
             <div className="p-10 flex justify-center"><LoadingSpinner /></div>
           ) : displayed.length === 0 ? (
             <div className="p-10 text-center text-xs text-[#57534e]">
-              Aucun fichier trouvé. Uploadez des médias pour commencer.
+              {t("media.noFiles")}
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 p-4">

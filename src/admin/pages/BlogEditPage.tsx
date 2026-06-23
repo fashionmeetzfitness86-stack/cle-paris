@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import FormField from '../components/FormField';
 import Toggle from '../components/Toggle';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -14,6 +15,8 @@ const langs = ['fr', 'en'] as const;
 
 
 export default function BlogEditPage() {
+  const { t, i18n } = useTranslation('admin');
+  const dateLocale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = id === 'new';
@@ -60,11 +63,11 @@ export default function BlogEditPage() {
         setOriginalForm(loaded);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur de chargement');
+      setError(e instanceof Error ? e.message : t('common.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [id, isNew]);
+  }, [id, isNew, t]);
 
   useEffect(() => {
     loadPost();
@@ -82,7 +85,7 @@ export default function BlogEditPage() {
         navigate('/admin/blog');
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la sauvegarde');
+      setError(e instanceof Error ? e.message : t('common.saveError'));
     } finally {
       setSaving(false);
     }
@@ -104,7 +107,7 @@ export default function BlogEditPage() {
         </Link>
         <div>
           <h2 className="text-xl font-display font-semibold text-[#e8e2d6]">
-            {isNew ? 'Nouvel article' : `Modifier — ${form.title_fr || '…'}`}
+            {isNew ? t('blog.editNewTitle') : t('blog.editTitle', { name: form.title_fr || '…' })}
           </h2>
         </div>
       </div>
@@ -114,13 +117,13 @@ export default function BlogEditPage() {
       <div className="space-y-5">
         {/* Meta */}
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Métadonnées</h3>
-          <FormField id="blog-slug" label="Slug" required value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: (e.target as HTMLInputElement).value }))} />
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('blog.sectionMeta')}</h3>
+          <FormField id="blog-slug" label={t('blog.slug')} required value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: (e.target as HTMLInputElement).value }))} />
           <div className="grid grid-cols-2 gap-4">
-            <FormField id="blog-title-fr" label="Titre FR" value={form.title_fr} onChange={(e) => setForm((f) => ({ ...f, title_fr: (e.target as HTMLInputElement).value }))} />
-            <FormField id="blog-title-en" label="Titre EN" value={form.title_en} onChange={(e) => setForm((f) => ({ ...f, title_en: (e.target as HTMLInputElement).value }))} />
+            <FormField id="blog-title-fr" label={t('blog.titleFr')} value={form.title_fr} onChange={(e) => setForm((f) => ({ ...f, title_fr: (e.target as HTMLInputElement).value }))} />
+            <FormField id="blog-title-en" label={t('blog.titleEn')} value={form.title_en} onChange={(e) => setForm((f) => ({ ...f, title_en: (e.target as HTMLInputElement).value }))} />
           </div>
-          <FormField id="blog-cover" label="Image de couverture (URL)" value={form.cover_image} onChange={(e) => setForm((f) => ({ ...f, cover_image: (e.target as HTMLInputElement).value }))} />
+          <FormField id="blog-cover" label={t('blog.coverImage')} value={form.cover_image} onChange={(e) => setForm((f) => ({ ...f, cover_image: (e.target as HTMLInputElement).value }))} />
           {form.cover_image && (
             <div className="aspect-video w-full max-w-sm bg-[#111] rounded overflow-hidden">
               <img src={form.cover_image} alt="Cover" className="w-full h-full object-cover" />
@@ -131,7 +134,7 @@ export default function BlogEditPage() {
         {/* Body */}
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Contenu</h3>
+            <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('blog.sectionContent')}</h3>
             <div className="flex gap-1 bg-[#111] border border-[#262626] rounded p-0.5">
               {langs.map((l) => (
                 <button key={l} onClick={() => setBodyLang(l)} className={`px-3 py-0.5 text-xs rounded transition-colors ${bodyLang === l ? 'bg-[#262626] text-[#e8e2d6]' : 'text-[#57534e]'}`}>
@@ -143,7 +146,7 @@ export default function BlogEditPage() {
           <FormField
             as="textarea"
             id="blog-body"
-            label={`Corps de l'article (${bodyLang.toUpperCase()})`}
+            label={t('blog.bodyLang', { lang: bodyLang.toUpperCase() })}
             rows={12}
             value={bodyLang === 'fr' ? form.body_fr : form.body_en}
             onChange={(e) => {
@@ -155,17 +158,17 @@ export default function BlogEditPage() {
 
         {/* Publish */}
         <section className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-5 space-y-4">
-          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">Publication</h3>
+          <h3 className="text-xs uppercase tracking-widest text-[#57534e]">{t('blog.sectionPublish')}</h3>
           <Toggle
             id="blog-published"
             checked={form.is_published}
             onChange={(v) => setForm((f) => ({ ...f, is_published: v, published_at: v ? new Date().toISOString() : null }))}
-            label="Article publié"
-            description="Visible dans le journal de la boutique"
+            label={t('blog.togglePublished')}
+            description={t('blog.togglePublishedDesc')}
           />
           {form.published_at && (
             <p className="text-xs text-[#57534e]">
-              Publié le {new Date(form.published_at).toLocaleDateString('fr-FR')}
+              {t('blog.publishedOn', { date: new Date(form.published_at).toLocaleDateString(dateLocale) })}
             </p>
           )}
         </section>
@@ -176,10 +179,10 @@ export default function BlogEditPage() {
             disabled={saving}
             className="bg-[#c8b89a] hover:bg-[#b8a88a] text-[#0f0f0f] text-sm font-semibold px-6 py-2.5 rounded transition-colors disabled:opacity-60"
           >
-            {saving ? 'Enregistrement…' : 'Enregistrer'}
+            {saving ? t('common.saving') : t('common.save')}
           </button>
           <Link to="/admin/blog" className="text-sm text-[#57534e] hover:text-[#a8a29e] px-6 py-2.5 border border-[#262626] rounded hover:border-[#57534e] transition-colors">
-            Annuler
+            {t('common.cancel')}
           </Link>
         </div>
       </div>
