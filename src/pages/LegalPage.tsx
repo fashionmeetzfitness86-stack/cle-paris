@@ -217,35 +217,40 @@ export default function LegalPage() {
     setTitle(page.title[lang]);
     setBody(page.body[lang]);
 
-    // Try fetching live content from DB
+    // Try fetching live content from DB. Only override the static
+    // fallback when the DB actually has non-empty content, so an empty
+    // or unseeded row never blanks the page.
     const dbSlug = SLUG_MAP[slug] ?? slug;
     fetchLegalPage(dbSlug).then((data) => {
-      if (data) {
-        setTitle(lang === "fr" ? data.title_fr : data.title_en);
-        setBody(lang === "fr" ? data.body_fr : data.body_en);
-      }
+      if (!data) return;
+      const dbTitle = lang === "fr" ? data.title_fr : data.title_en;
+      const dbBody = lang === "fr" ? data.body_fr : data.body_en;
+      if (dbTitle?.trim()) setTitle(dbTitle);
+      if (dbBody?.trim()) setBody(dbBody);
     });
   }, [slug, lang]);
 
   return (
+    <div className="min-h-screen bg-[#F4EFE8]">
     <div className="mx-auto max-w-3xl px-6 py-24 animate-fade-up">
       <Link
         to="/"
-        className="group inline-flex items-center gap-2 text-xs uppercase tracking-widest text-stone-600 hover:text-bone transition-colors duration-300 mb-10"
+        className="group inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#6F6F6F] hover:text-[#111] transition-colors duration-300 mb-10"
       >
         <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span>
         {t("common.back")}
       </Link>
 
-      <div className="h-px bg-gradient-to-r from-stone-800 to-transparent mb-10 animate-fade-up delay-75" />
+      <div className="h-px bg-gradient-to-r from-[#C8A97E] to-transparent mb-10 animate-fade-up delay-75" />
 
-      <h1 className="font-display text-4xl tracking-tight animate-fade-up delay-100">
+      <h1 className="font-display text-4xl tracking-tight text-[#111] animate-fade-up delay-100">
         {title}
       </h1>
 
-      <div className="mt-8 whitespace-pre-line text-sm leading-loose text-stone-400 animate-fade-up delay-200">
+      <div className="mt-8 whitespace-pre-line text-sm leading-loose text-[#4A4A4A] animate-fade-up delay-200">
         {body}
       </div>
+    </div>
     </div>
   );
 }
