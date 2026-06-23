@@ -38,7 +38,7 @@ export default function Header() {
             : "bg-[#F4EFE8]/80 backdrop-blur-sm border-b border-black/5"
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Left nav */}
           <nav className="hidden items-center gap-8 md:flex">
             <NavLink to="/collection" className={navClass}>
@@ -52,16 +52,16 @@ export default function Header() {
             </NavLink>
           </nav>
 
-          {/* Wordmark — centered logo */}
+          {/* Wordmark — absolutely centered, large */}
           <Link
             to="/"
             aria-label="CLÉ PARIS"
-            className="transition-opacity duration-300 hover:opacity-70"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 hover:opacity-70"
           >
             <img
               src="/images/cle-logo.png"
               alt="CLÉ PARIS"
-              className="h-7 w-auto md:h-8"
+              className="h-14 w-auto md:h-20"
             />
           </Link>
 
