@@ -5,11 +5,12 @@ import type { CartItem } from "../types";
  * redirects the browser to Stripe's hosted payment page.
  * Throws on failure so the caller can surface an error.
  */
-export async function startCheckout(items: CartItem[]): Promise<void> {
+export async function startCheckout(items: CartItem[], country = "FR"): Promise<void> {
   const res = await fetch("/.netlify/functions/create-checkout", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      country,
       items: items.map((i) => ({
         productSlug: i.productSlug,
         size: i.size,

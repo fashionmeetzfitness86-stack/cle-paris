@@ -21,6 +21,7 @@ import CustomersPage from './pages/CustomersPage';
 import LegalEditorPage from './pages/LegalEditorPage';
 import I18nEditorPage from './pages/I18nEditorPage';
 import SettingsPage from './pages/SettingsPage';
+import ShippingPage from './pages/ShippingPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import { isSupabaseConfigured, isMockMode } from '../lib/supabase';
 
@@ -92,6 +93,7 @@ export default function AdminApp() {
           <Route path="orders/:id" element={<OrderDetailPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="legal" element={<LegalEditorPage />} />
+          <Route path="shipping" element={<ShippingPage />} />
           <Route path="i18n" element={<I18nEditorPage />} />
           <Route
             path="settings"

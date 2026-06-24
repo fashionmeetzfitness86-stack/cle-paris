@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useCart } from "../store/cart";
 import { useProductMap } from "../hooks/useProducts";
 import { startCheckout } from "../lib/checkout";
+import { fetchShipping, computeShipping, type ShippingSettings } from "../lib/storefront";
+import { COUNTRIES } from "../lib/countries";
 import { useTranslation } from "react-i18next";
 import type { Lang } from "../types";
 
 export default function CartDrawer() {
-  const { items, isOpen, close, remove, updateQty } = useCart();
+  const { items, isOpen, close, remove, updateQty, country, setCountry } = useCart();
   const { i18n, t } = useTranslation();
   const lang = i18n.language as Lang;
   const { map: productMap } = useProductMap();
@@ -14,13 +16,23 @@ export default function CartDrawer() {
 
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [shipping, setShipping] = useState<ShippingSettings | null>(null);
+
+  // Load shipping settings once.
+  useEffect(() => {
+    let alive = true;
+    fetchShipping().then((s) => alive && setShipping(s));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handleCheckout = async () => {
     if (items.length === 0 || checkingOut) return;
     setCheckoutError("");
     setCheckingOut(true);
     try {
-      await startCheckout(items);
+      await startCheckout(items, country);
       // On success the browser redirects to Stripe; no further code runs.
     } catch (e) {
       setCheckoutError(e instanceof Error ? e.message : String(e));
@@ -51,6 +63,9 @@ export default function CartDrawer() {
     const p = getProductBySlug(item.productSlug);
     return p ? sum + p.price * item.qty : sum;
   }, 0);
+
+  const shippingCost = shipping ? computeShipping(shipping, subtotal, country) : 0;
+  const total = subtotal + shippingCost;
 
   if (!mounted) return null;
 
@@ -163,11 +178,40 @@ export default function CartDrawer() {
 
         {/* Footer */}
         <div className="border-t border-black/8 bg-[#F4EFE8] px-6 py-6">
+          {/* Destination country */}
+          {items.length > 0 && (
+            <div className="mb-4">
+              <label htmlFor="cart-country" className="block text-[10px] uppercase tracking-[0.2em] text-[#6F6F6F] mb-1.5">
+                {t("cart.shipTo")}
+              </label>
+              <select
+                id="cart-country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full border border-black/15 bg-[#FAF7F2] px-3 py-2.5 text-sm text-[#111] focus:outline-none focus:border-[#111] transition-colors"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {lang === "fr" ? c.fr : c.en}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="flex justify-between items-baseline">
             <span className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">{t("cart.subtotal")}</span>
-            <span className="text-base font-medium text-[#111] tabular-nums">
-              €{subtotal.toFixed(2)}
+            <span className="text-sm text-[#3A3A3A] tabular-nums">€{subtotal.toFixed(2)}</span>
+          </div>
+          <div className="mt-1.5 flex justify-between items-baseline">
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">{t("cart.shipping")}</span>
+            <span className="text-sm text-[#3A3A3A] tabular-nums">
+              {shippingCost === 0 ? t("cart.free") : `€${shippingCost.toFixed(2)}`}
             </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/8 flex justify-between items-baseline">
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[#111]">{t("cart.total")}</span>
+            <span className="text-base font-medium text-[#111] tabular-nums">€{total.toFixed(2)}</span>
           </div>
           <button
             onClick={handleCheckout}
@@ -181,9 +225,11 @@ export default function CartDrawer() {
               {checkoutError}
             </p>
           )}
-          <p className="mt-3 text-center text-[10px] text-[#6F6F6F] tracking-wide">
-            {t("cart.freeShipping")}
-          </p>
+          {shipping?.free_shipping_threshold != null && subtotal < shipping.free_shipping_threshold && (
+            <p className="mt-3 text-center text-[10px] text-[#6F6F6F] tracking-wide">
+              {t("cart.freeFrom", { amount: shipping.free_shipping_threshold })}
+            </p>
+          )}
         </div>
       </aside>
     </div>

@@ -68,6 +68,7 @@
     "testimonials": "Avis",
     "orders": "Commandes",
     "customers": "Clients",
+    "shipping": "Livraison",
     "seo": "SEO",
     "legal": "Mentions légales",
     "i18n": "Traductions",
@@ -482,6 +483,19 @@
     "filterAll": "Tous",
     "emptyTitle": "Aucune entrée",
     "emptyDesc": "Les clés de traduction s'afficheront ici."
+  },
+  "shipping": {
+    "overline": "Commerce",
+    "title": "Livraison",
+    "subtitle": "Définis les tarifs de livraison nationale et internationale.",
+    "nationalZone": "Zone nationale",
+    "nationalZoneHint": "Sélectionne les pays considérés comme « nationaux ». Tous les autres seront facturés au tarif international.",
+    "prices": "Tarifs",
+    "nationalPrice": "Tarif national (€)",
+    "internationalPrice": "Tarif international (€)",
+    "freeShipping": "Livraison offerte",
+    "freeEnable": "Activer la livraison offerte à partir d'un montant",
+    "freeThreshold": "À partir de (€)"
   },
   "settings": {
     "overline": "Configuration",

@@ -181,6 +181,54 @@ export async function fetchHomepageSections(): Promise<StorefrontSection[]> {
   }
 }
 
+// ─── Shipping settings ────────────────────────────────────────
+
+export interface ShippingSettings {
+  national_countries: string[];
+  national_price: number;
+  international_price: number;
+  free_shipping_threshold: number | null;
+}
+
+const DEFAULT_SHIPPING: ShippingSettings = {
+  national_countries: ["FR"],
+  national_price: 0,
+  international_price: 0,
+  free_shipping_threshold: 150,
+};
+
+/** Fetch shipping settings (with sensible default fallback). */
+export async function fetchShipping(): Promise<ShippingSettings> {
+  if (!isSupabaseConfigured()) return DEFAULT_SHIPPING;
+  try {
+    const { data, error } = await supabase
+      .from("shipping_settings")
+      .select("national_countries, national_price, international_price, free_shipping_threshold")
+      .limit(1)
+      .single();
+    if (error || !data) return DEFAULT_SHIPPING;
+    return {
+      national_countries: (data.national_countries as string[]) ?? ["FR"],
+      national_price: Number(data.national_price) || 0,
+      international_price: Number(data.international_price) || 0,
+      free_shipping_threshold:
+        data.free_shipping_threshold == null ? null : Number(data.free_shipping_threshold),
+    };
+  } catch {
+    return DEFAULT_SHIPPING;
+  }
+}
+
+/** Compute the shipping cost for a given subtotal + destination country. */
+export function computeShipping(
+  s: ShippingSettings,
+  subtotal: number,
+  country: string
+): number {
+  if (s.free_shipping_threshold != null && subtotal >= s.free_shipping_threshold) return 0;
+  return s.national_countries.includes(country) ? s.national_price : s.international_price;
+}
+
 // ─── Legal Pages ──────────────────────────────────────────────
 
 export interface StorefrontLegalPage {

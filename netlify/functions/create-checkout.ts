@@ -49,9 +49,13 @@ export default async (req: Request) => {
   }
 
   let items: ClientItem[];
+  let country = "FR";
   try {
-    const body = (await req.json()) as { items?: ClientItem[] };
+    const body = (await req.json()) as { items?: ClientItem[]; country?: string };
     items = body.items ?? [];
+    if (typeof body.country === "string" && body.country.length === 2) {
+      country = body.country.toUpperCase();
+    }
   } catch {
     return json(400, { error: "Invalid request body." });
   }
@@ -122,29 +126,43 @@ export default async (req: Request) => {
     });
   }
 
-  // Shipping: free over threshold, otherwise a flat rate.
-  const freeThreshold = Number(process.env.FREE_SHIPPING_THRESHOLD ?? 150);
-  const shippingFlat = Number(process.env.SHIPPING_FLAT_EUR ?? 9.9);
-  const shipping_options: Stripe.Checkout.SessionCreateParams.ShippingOption[] =
-    subtotal >= freeThreshold
-      ? [
-          {
-            shipping_rate_data: {
-              type: "fixed_amount",
-              display_name: "Livraison offerte",
-              fixed_amount: { amount: 0, currency: "eur" },
-            },
-          },
-        ]
-      : [
-          {
-            shipping_rate_data: {
-              type: "fixed_amount",
-              display_name: "Livraison standard",
-              fixed_amount: { amount: Math.round(shippingFlat * 100), currency: "eur" },
-            },
-          },
-        ];
+  // Shipping: national vs international from shipping_settings, free over threshold.
+  let nationalCountries = ["FR"];
+  let nationalPrice = Number(process.env.SHIPPING_FLAT_EUR ?? 0);
+  let internationalPrice = nationalPrice;
+  let freeThreshold: number | null = Number(process.env.FREE_SHIPPING_THRESHOLD ?? 150);
+  try {
+    const { data: ship } = await supabase
+      .from("shipping_settings")
+      .select("national_countries, national_price, international_price, free_shipping_threshold")
+      .limit(1)
+      .single();
+    if (ship) {
+      nationalCountries = (ship.national_countries as string[]) ?? ["FR"];
+      nationalPrice = Number(ship.national_price) || 0;
+      internationalPrice = Number(ship.international_price) || 0;
+      freeThreshold = ship.free_shipping_threshold == null ? null : Number(ship.free_shipping_threshold);
+    }
+  } catch {
+    /* fall back to env defaults */
+  }
+
+  const isFree = freeThreshold != null && subtotal >= freeThreshold;
+  const shipAmount = isFree
+    ? 0
+    : nationalCountries.includes(country)
+      ? nationalPrice
+      : internationalPrice;
+
+  const shipping_options: Stripe.Checkout.SessionCreateParams.ShippingOption[] = [
+    {
+      shipping_rate_data: {
+        type: "fixed_amount",
+        display_name: shipAmount === 0 ? "Livraison offerte" : "Livraison",
+        fixed_amount: { amount: Math.round(shipAmount * 100), currency: "eur" },
+      },
+    },
+  ];
 
   const origin = new URL(req.url).origin;
 
@@ -155,7 +173,11 @@ export default async (req: Request) => {
       shipping_options,
       automatic_tax: { enabled: false },
       shipping_address_collection: {
-        allowed_countries: ["FR", "BE", "LU", "DE", "ES", "IT", "NL", "PT", "AT", "IE"],
+        allowed_countries: [
+          "FR", "BE", "CH", "LU", "MC", "DE", "ES", "IT", "PT", "NL",
+          "AT", "IE", "GB", "DK", "SE", "NO", "FI", "PL", "CZ", "GR",
+          "US", "CA", "AU", "JP", "AE", "MA", "TN", "DZ",
+        ] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
       },
       phone_number_collection: { enabled: true },
       success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,

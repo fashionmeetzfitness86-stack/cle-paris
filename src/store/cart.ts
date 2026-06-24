@@ -5,9 +5,11 @@ import type { CartItem } from "../types";
 type CartState = {
   items: CartItem[];
   isOpen: boolean;
+  country: string;
   add: (item: CartItem) => void;
   remove: (slug: string, size: string, colorId: string) => void;
   updateQty: (slug: string, size: string, colorId: string, qty: number) => void;
+  setCountry: (country: string) => void;
   clear: () => void;
   open: () => void;
   close: () => void;
@@ -19,6 +21,7 @@ export const useCart = create<CartState>()(
     (set) => ({
       items: [],
       isOpen: false,
+      country: "FR",
       add: (item) =>
         set((s) => {
           const existing = s.items.find(
@@ -50,6 +53,7 @@ export const useCart = create<CartState>()(
             )
             .filter((i) => i.qty > 0),
         })),
+      setCountry: (country) => set({ country }),
       clear: () => set({ items: [] }),
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),

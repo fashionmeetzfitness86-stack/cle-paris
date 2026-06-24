@@ -68,6 +68,7 @@
     "testimonials": "Reviews",
     "orders": "Orders",
     "customers": "Customers",
+    "shipping": "Shipping",
     "seo": "SEO",
     "legal": "Legal",
     "i18n": "Translations",
@@ -482,6 +483,19 @@
     "filterAll": "All",
     "emptyTitle": "No entry",
     "emptyDesc": "Translation keys will appear here."
+  },
+  "shipping": {
+    "overline": "Commerce",
+    "title": "Shipping",
+    "subtitle": "Set your national and international shipping rates.",
+    "nationalZone": "National zone",
+    "nationalZoneHint": "Select the countries treated as \"national\". All others are charged the international rate.",
+    "prices": "Rates",
+    "nationalPrice": "National rate (€)",
+    "internationalPrice": "International rate (€)",
+    "freeShipping": "Free shipping",
+    "freeEnable": "Enable free shipping above an amount",
+    "freeThreshold": "From (€)"
   },
   "settings": {
     "overline": "Configuration",

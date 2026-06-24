@@ -118,6 +118,15 @@ const navGroups = [
           </svg>
         ),
       },
+      {
+        label: 'nav.shipping',
+        path: '/admin/shipping',
+        icon: (
+          <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+            <path d="M1 3h9v7H1zM10 5h3l2 2v3h-5zM4 11.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 11.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
+          </svg>
+        ),
+      },
     ],
   },
   {
