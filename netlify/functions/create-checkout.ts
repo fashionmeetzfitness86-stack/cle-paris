@@ -38,7 +38,14 @@ export default async (req: Request) => {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!stripeKey || !supabaseUrl || !serviceKey) {
-    return json(500, { error: "Payment is not configured." });
+    return json(500, {
+      error: "Payment is not configured.",
+      missing: {
+        STRIPE_SECRET_KEY: !stripeKey,
+        SUPABASE_URL_or_VITE: !supabaseUrl,
+        SUPABASE_SERVICE_ROLE_KEY: !serviceKey,
+      },
+    });
   }
 
   let items: ClientItem[];
