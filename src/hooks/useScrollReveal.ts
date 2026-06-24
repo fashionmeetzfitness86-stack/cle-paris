@@ -12,11 +12,6 @@ export function useScrollReveal() {
     const container = ref.current;
     if (!container) return;
 
-    const targets = Array.from(
-      container.querySelectorAll<HTMLElement>(".reveal")
-    );
-    if (targets.length === 0) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -29,8 +24,22 @@ export function useScrollReveal() {
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
 
-    targets.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    // Observe all current .reveal children — and any added later
+    // (product cards load async from Supabase, so they appear after mount).
+    const observeAll = () => {
+      container
+        .querySelectorAll<HTMLElement>(".reveal:not(.in-view)")
+        .forEach((el) => observer.observe(el));
+    };
+    observeAll();
+
+    const mutationObserver = new MutationObserver(() => observeAll());
+    mutationObserver.observe(container, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, []);
 
   return ref;

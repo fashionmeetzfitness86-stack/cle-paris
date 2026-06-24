@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProduct, useProducts } from "../hooks/useProducts";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useCart } from "../store/cart";
 import type { Lang, ProductVariant } from "../types";
 
@@ -42,6 +43,7 @@ export default function ProductPage() {
   const { product, loading } = useProduct(slug);
   const { products: activeProducts } = useProducts();
   const add = useCart((s) => s.add);
+  const relatedRef = useScrollReveal();
 
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState<ProductVariant["size"] | "">("");
@@ -288,7 +290,7 @@ export default function ProductPage() {
             <h2 className="font-display text-2xl font-light tracking-tight text-[#111] animate-fade-up">
               {t("product.relatedItems")}
             </h2>
-            <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            <div ref={relatedRef} className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
                 <Link
                   key={p.slug}
