@@ -44,9 +44,6 @@ export default function CollectionPage() {
             <h1 className="font-display text-4xl font-light tracking-tight text-[#111] md:text-5xl">
               {t("collection.title")}&nbsp;<em className="font-light not-italic text-[#C8A97E]">2026</em>
             </h1>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">
-              [{products.length} {t("collection.itemsFound")}]
-            </div>
           </div>
         </header>
 
