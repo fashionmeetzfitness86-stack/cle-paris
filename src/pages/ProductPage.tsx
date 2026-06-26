@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useProduct, useProducts } from "../hooks/useProducts";
+import { useProduct, useProducts, SIZE_ORDER } from "../hooks/useProducts";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { useCart } from "../store/cart";
 import type { Lang, ProductVariant } from "../types";
@@ -25,14 +25,92 @@ function Accordion({ label, children }: { label: string; children: React.ReactNo
         </span>
       </button>
       <div
-        className="overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ maxHeight: open ? "200px" : "0px", opacity: open ? 1 : 0 }}
+        className="overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ maxHeight: open ? "500px" : "0px", opacity: open ? 1 : 0 }}
       >
         <div className="pb-4 text-[11px] leading-relaxed text-[#6F6F6F] tracking-wide">
           {children}
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Size guide slide-in panel ────────────────────────────────────
+function SizeGuide({ open, onClose, lang }: { open: boolean; onClose: () => void; lang: string }) {
+  const isFr = lang === "fr";
+  const sizes = [
+    { size: "XS",  chest: "86–91",  waist: "70–75",  hip: "91–96"  },
+    { size: "S",   chest: "91–96",  waist: "75–80",  hip: "96–101" },
+    { size: "M",   chest: "96–101", waist: "80–85",  hip: "101–106" },
+    { size: "L",   chest: "101–106",waist: "85–90",  hip: "106–111" },
+    { size: "XL",  chest: "106–111",waist: "90–95",  hip: "111–116" },
+    { size: "XXL", chest: "111–116",waist: "95–100", hip: "116–121" },
+  ];
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-50 bg-[#111]/30 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      {/* Panel */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={isFr ? "Guide des tailles" : "Size Guide"}
+        className={`fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2] shadow-[0_-8px_40px_rgba(0,0,0,0.12)] transition-transform duration-[420ms] ease-[cubic-bezier(0.32,0.72,0,1)] md:bottom-auto md:top-1/2 md:left-1/2 md:right-auto md:w-[520px] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-sm ${
+          open ? "translate-y-0" : "translate-y-full md:translate-y-[-40%] md:opacity-0"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-black/8 px-6 py-5">
+          <h3 className="text-[11px] uppercase tracking-[0.25em] text-[#111]">
+            {isFr ? "Guide des tailles" : "Size Guide"}
+          </h3>
+          <button
+            onClick={onClose}
+            aria-label={isFr ? "Fermer" : "Close"}
+            className="flex h-8 w-8 items-center justify-center text-[#6F6F6F] hover:text-[#111] transition-colors text-xl"
+          >
+            ×
+          </button>
+        </div>
+        <div className="overflow-x-auto px-6 py-6">
+          <p className="mb-4 text-[11px] text-[#6F6F6F] leading-relaxed">
+            {isFr
+              ? "Toutes les mesures sont en centimètres. Mesurez votre tour de poitrine, de taille et de hanches."
+              : "All measurements are in centimetres. Measure your chest, waist, and hip circumference."}
+          </p>
+          <table className="w-full text-[11px] text-[#3A3A3A]">
+            <thead>
+              <tr className="border-b border-black/8">
+                {[isFr ? "Taille" : "Size", isFr ? "Poitrine" : "Chest", isFr ? "Taille" : "Waist", isFr ? "Hanches" : "Hips"].map((h) => (
+                  <th key={h} className="pb-3 pr-6 text-left text-[10px] uppercase tracking-[0.2em] text-[#6F6F6F] font-normal">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {sizes.map((row) => (
+                <tr key={row.size} className="border-b border-black/5 hover:bg-[#F4EFE8] transition-colors">
+                  <td className="py-3 pr-6 font-medium text-[#111]">{row.size}</td>
+                  <td className="py-3 pr-6">{row.chest}</td>
+                  <td className="py-3 pr-6">{row.waist}</td>
+                  <td className="py-3">{row.hip}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-6 text-[10px] text-[#6F6F6F]">
+            {isFr
+              ? "En cas de doute entre deux tailles, prenez la plus grande."
+              : "If in doubt between two sizes, choose the larger one."}
+          </p>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -49,6 +127,7 @@ export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState<ProductVariant["size"] | "">("");
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   // Track which image "key" to force re-render for fade animation
   const [imgKey, setImgKey] = useState(0);
 
@@ -61,6 +140,47 @@ export default function ProductPage() {
   useEffect(() => {
     setSelectedSize("");
   }, [selectedColor]);
+
+  // Update page title + OG social meta tags for each product
+  useEffect(() => {
+    if (!product) return;
+    const title = `${product.name} — CLÉ PARIS`;
+    document.title = title;
+    const setMeta = (prop: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[property="${prop}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("property", prop);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+    const setMetaName = (name: string, content: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("name", name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+    const desc = product.description[lang] || "";
+    const image = product.images[0] ?? "";
+    const absoluteImage = image.startsWith("/") ? `${window.location.origin}${image}` : image;
+    setMeta("og:title", title);
+    setMeta("og:description", desc);
+    setMeta("og:image", absoluteImage);
+    setMeta("og:url", window.location.href);
+    setMeta("og:type", "product");
+    setMetaName("twitter:title", title);
+    setMetaName("twitter:description", desc);
+    setMetaName("twitter:image", absoluteImage);
+    setMetaName("description", desc);
+
+    return () => {
+      document.title = "CLÉ PARIS";
+    };
+  }, [product, lang]);
 
   if (loading) {
     return (
@@ -229,20 +349,25 @@ export default function ProductPage() {
                 <div className="text-[11px] uppercase tracking-[0.2em] text-[#6F6F6F]">
                   {t("product.size")}
                 </div>
-                <button className="text-[11px] text-[#C8A97E] underline underline-offset-2 hover:text-[#111] transition-colors">
+                <button
+                  onClick={() => setSizeGuideOpen(true)}
+                  className="text-[11px] text-[#C8A97E] underline underline-offset-2 hover:text-[#111] transition-colors">
                   {t("product.sizeGuide")}
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                {Array.from(new Set(product.variants.map((v) => v.size))).map((size) => {
-                  const inStock = isInStock(size);
+                {SIZE_ORDER
+                .filter((sz) => product.variants.some((v) => v.size === sz))
+                .map((size) => {
+                  const typedSize = size as ProductVariant["size"];
+                  const inStock = isInStock(typedSize);
                   return (
                     <button
                       key={size}
                       disabled={!inStock}
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => setSelectedSize(typedSize)}
                       className={`min-w-[3rem] border px-3 py-2.5 text-[11px] uppercase tracking-widest transition-all duration-300 ${
-                        selectedSize === size
+                        selectedSize === typedSize
                           ? "border-[#111] bg-[#111] text-[#FAF7F2] scale-105"
                           : inStock
                             ? "border-black/15 text-[#3A3A3A] hover:border-[#111] hover:scale-105"
@@ -302,6 +427,7 @@ export default function ProductPage() {
                     <img
                       src={p.images[0]}
                       alt={p.name}
+                      loading="lazy"
                       className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
@@ -340,6 +466,9 @@ export default function ProductPage() {
           </button>
         </div>
       </div>
+
+      {/* Size guide panel */}
+      <SizeGuide open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} lang={lang} />
     </div>
   );
 }

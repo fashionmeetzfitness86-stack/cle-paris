@@ -141,18 +141,22 @@ export default function HomePage() {
                   <img
                     src={p.images[0]}
                     alt={p.name}
+                    loading="lazy"
                     className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   {p.images[1] && (
                     <img
                       src={p.images[1]}
                       alt={`${p.name} view 2`}
+                      loading="lazy"
                       className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                     />
                   )}
-                  <span className="absolute left-3 top-3 bg-[#C8A97E] px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-white">
-                    {t("home.new")}
-                  </span>
+                  {p.isNew && (
+                    <span className="absolute left-3 top-3 bg-[#C8A97E] px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-white">
+                      {t("home.new")}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-4 flex items-start justify-between gap-2">
                   <div>

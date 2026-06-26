@@ -95,9 +95,10 @@ function mapDbProductToStorefront(row: Record<string, unknown>): Product | null 
     const categoryRow = row.categories as { slug: string } | null;
     const categorySlug = categoryRow?.slug ?? "";
     const categoryMap: Record<string, Product["category"]> = {
-      hauts: "hoodie",
-      bas: "pants",
-      accessoires: "accessory",
+      hauts:        "hoodie",
+      bas:          "pants",
+      shorts:       "shorts",
+      accessoires:  "accessory",
     };
     const category: Product["category"] = categoryMap[categorySlug] ?? "tshirt";
 
@@ -119,6 +120,7 @@ function mapDbProductToStorefront(row: Record<string, unknown>): Product | null 
       variants,
       images: images.length > 0 ? images : ["/images/sweat2_flat.jpg"],
       archived: row.is_archived as boolean,
+      isNew: !!(row.is_new as boolean),
     };
   } catch {
     return null;

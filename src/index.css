@@ -63,11 +63,6 @@
   to   { opacity: 1; }
 }
 
-@keyframes lineReveal {
-  0%   { scaleX: 0; transform-origin: left; }
-  100% { scaleX: 1; transform-origin: left; }
-}
-
 @keyframes lightSweep {
   0%   { left: -100%; }
   100% { left: 100%; }
@@ -241,7 +236,13 @@
     border: none;
     border-top: 1px solid var(--border);
   }
-}
+
+  /* ── iOS safe area — bottom of screen (home indicator) ── */
+  .safe-bottom {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+} /* end @layer utilities */
 
 /* ─── Reduced motion — global override ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

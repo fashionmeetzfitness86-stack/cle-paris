@@ -32,7 +32,7 @@ export default function CartDrawer() {
     setCheckoutError("");
     setCheckingOut(true);
     try {
-      await startCheckout(items, country);
+      await startCheckout(items, country, t("cart.checkoutError"));
       // On success the browser redirects to Stripe; no further code runs.
     } catch (e) {
       setCheckoutError(e instanceof Error ? e.message : String(e));

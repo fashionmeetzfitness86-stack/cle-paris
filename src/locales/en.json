@@ -48,6 +48,7 @@
     "filterTops": "Tops",
     "filterPants": "Pants",
     "filterShorts": "Shorts",
+    "filterAccessories": "Accessories",
     "viewProduct": "View product →",
     "empty": "No products in this category.",
     "viewAll": "See all products →"
@@ -110,7 +111,8 @@
     "freeShipping": "Free shipping over €150",
     "decrease": "Decrease",
     "increase": "Increase",
-    "close": "Close cart"
+    "close": "Close cart",
+    "checkoutError": "Payment is temporarily unavailable. Please try again."
   },
   "order": {
     "title": "Thank you for your order",

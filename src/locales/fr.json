@@ -48,6 +48,7 @@
     "filterTops": "Hauts",
     "filterPants": "Pantalons",
     "filterShorts": "Shorts",
+    "filterAccessories": "Accessoires",
     "viewProduct": "Voir le produit →",
     "empty": "Aucun produit dans cette catégorie.",
     "viewAll": "Voir tous les produits →"
@@ -110,7 +111,8 @@
     "freeShipping": "Livraison gratuite à partir de 150 €",
     "decrease": "Diminuer",
     "increase": "Augmenter",
-    "close": "Fermer le panier"
+    "close": "Fermer le panier",
+    "checkoutError": "Le paiement est momentanément indisponible. Veuillez réessayer."
   },
   "order": {
     "title": "Merci pour votre commande",

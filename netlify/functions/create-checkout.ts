@@ -1,7 +1,7 @@
 /**
  * POST /.netlify/functions/create-checkout
  *
- * Body: { items: { productSlug, size, colorId, qty }[] }
+ * Body: { items: { productSlug, size, colorId, qty }[], country?: string }
  *
  * Creates a Stripe Checkout Session. Prices are ALWAYS read from
  * Supabase server-side — the client price is never trusted. Returns
@@ -11,11 +11,13 @@
  *   STRIPE_SECRET_KEY
  *   SUPABASE_URL (or VITE_SUPABASE_URL)
  *   SUPABASE_SERVICE_ROLE_KEY
+ *   VITE_SITE_URL (used for CORS origin validation)
  *   FREE_SHIPPING_THRESHOLD (optional, default 150)
  *   SHIPPING_FLAT_EUR (optional, default 9.90)
  */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { requireOrigin, corsHeaders } from "./_cors.js";
 
 interface ClientItem {
   productSlug: string;
@@ -24,14 +26,18 @@ interface ClientItem {
   qty: number;
 }
 
-const json = (status: number, body: unknown) =>
+const json = (status: number, body: unknown, req: Request) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...corsHeaders(req) },
   });
 
 export default async (req: Request) => {
-  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
+  // CORS preflight + origin guard
+  const corsResponse = requireOrigin(req);
+  if (corsResponse) return corsResponse;
+
+  if (req.method !== "POST") return json(405, { error: "Method not allowed" }, req);
 
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -45,7 +51,7 @@ export default async (req: Request) => {
         SUPABASE_URL_or_VITE: !supabaseUrl,
         SUPABASE_SERVICE_ROLE_KEY: !serviceKey,
       },
-    });
+    }, req);
   }
 
   let items: ClientItem[];
@@ -57,11 +63,11 @@ export default async (req: Request) => {
       country = body.country.toUpperCase();
     }
   } catch {
-    return json(400, { error: "Invalid request body." });
+    return json(400, { error: "Invalid request body." }, req);
   }
 
   if (!Array.isArray(items) || items.length === 0) {
-    return json(400, { error: "Cart is empty." });
+    return json(400, { error: "Cart is empty." }, req);
   }
 
   const stripe = new Stripe(stripeKey);
@@ -86,7 +92,7 @@ export default async (req: Request) => {
     .select("slug, name, price, currency, is_archived, product_media(url, sort_order)")
     .in("slug", slugs);
 
-  if (error) return json(500, { error: "Could not load products." });
+  if (error) return json(500, { error: "Could not load products." }, req);
 
   const bySlug = new Map((products ?? []).map((p) => [p.slug as string, p]));
 
@@ -96,11 +102,11 @@ export default async (req: Request) => {
   for (const it of merged.values()) {
     const p = bySlug.get(it.productSlug);
     if (!p || p.is_archived) {
-      return json(400, { error: `Product unavailable: ${it.productSlug}` });
+      return json(400, { error: `Product unavailable: ${it.productSlug}` }, req);
     }
     const price = Number(p.price);
     if (!Number.isFinite(price) || price <= 0) {
-      return json(400, { error: `Invalid price for ${it.productSlug}` });
+      return json(400, { error: `Invalid price for ${it.productSlug}` }, req);
     }
     subtotal += price * it.qty;
 
@@ -166,6 +172,53 @@ export default async (req: Request) => {
 
   const origin = new URL(req.url).origin;
 
+  // Build cart metadata safely — never truncate mid-JSON.
+  // Stripe metadata values are limited to 500 chars each (total 8KB per session).
+  // We use the dedicated "cart" key which allows up to 500 chars.
+  // If the serialized cart exceeds that, we reject early so order items are never lost.
+  const cartLines = [...merged.values()].map((i) => ({
+    slug: i.productSlug,
+    size: i.size,
+    color: i.colorId,
+    qty: i.qty,
+  }));
+  const cartJson = JSON.stringify(cartLines);
+  if (cartJson.length > 490) {
+    // Cart is too large for Stripe metadata; store a compact form (slug+size+color+qty only)
+    // If still too large, return a clear error instead of corrupting the order.
+    const compactJson = JSON.stringify(cartLines.map((l) => [l.slug, l.size, l.color, l.qty]));
+    if (compactJson.length > 490) {
+      return json(400, {
+        error: "Your cart is too large to process in a single order. Please reduce the number of items.",
+      }, req);
+    }
+    // Use compact format; webhook must handle both formats
+    const cartMeta = { cart: compactJson, cart_fmt: "compact" };
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items,
+        shipping_options,
+        automatic_tax: { enabled: false },
+        shipping_address_collection: {
+          allowed_countries: [
+            "FR", "BE", "CH", "LU", "MC", "DE", "ES", "IT", "PT", "NL",
+            "AT", "IE", "GB", "DK", "SE", "NO", "FI", "PL", "CZ", "GR",
+            "US", "CA", "AU", "JP", "AE", "MA", "TN", "DZ",
+          ] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
+        },
+        phone_number_collection: { enabled: true },
+        success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/collection?checkout=cancelled`,
+        metadata: cartMeta,
+      });
+      return json(200, { url: session.url }, req);
+    } catch {
+      return json(500, { error: "Could not start checkout." }, req);
+    }
+  }
+  const cartMeta = { cart: cartJson };
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -182,20 +235,11 @@ export default async (req: Request) => {
       phone_number_collection: { enabled: true },
       success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/collection?checkout=cancelled`,
-      metadata: {
-        cart: JSON.stringify(
-          [...merged.values()].map((i) => ({
-            slug: i.productSlug,
-            size: i.size,
-            color: i.colorId,
-            qty: i.qty,
-          }))
-        ).slice(0, 4900),
-      },
+      metadata: cartMeta,
     });
 
-    return json(200, { url: session.url });
+    return json(200, { url: session.url }, req);
   } catch (e) {
-    return json(500, { error: "Could not start checkout." });
+    return json(500, { error: "Could not start checkout." }, req);
   }
 };
