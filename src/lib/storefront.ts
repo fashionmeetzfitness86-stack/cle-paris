@@ -18,7 +18,10 @@ import type { Product } from "../types";
 
 /** Fetch all active products, with static fallback */
 export async function fetchActiveProducts(): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return staticGetActiveProducts();
+  if (!isSupabaseConfigured()) {
+    console.info("[CLÉ PARIS] Supabase not configured — serving static product data.");
+    return staticGetActiveProducts();
+  }
 
   try {
     // Fetch products with their colors, variants, media, and category slug
@@ -28,10 +31,20 @@ export async function fetchActiveProducts(): Promise<Product[]> {
       .eq("is_archived", false)
       .order("sort_order");
 
-    if (error || !dbProducts) return staticGetActiveProducts();
+    if (error) {
+      console.error("[CLÉ PARIS] Supabase error in fetchActiveProducts:", error.message, error.code);
+      return staticGetActiveProducts();
+    }
+    if (!dbProducts || dbProducts.length === 0) {
+      console.warn("[CLÉ PARIS] fetchActiveProducts returned 0 rows — DB may be empty.");
+      return staticGetActiveProducts();
+    }
 
-    return dbProducts.map(mapDbProductToStorefront).filter(Boolean) as Product[];
-  } catch {
+    const mapped = dbProducts.map(mapDbProductToStorefront).filter(Boolean) as Product[];
+    console.info(`[CLÉ PARIS] fetchActiveProducts: ${mapped.length} products loaded from Supabase.`);
+    return mapped;
+  } catch (e) {
+    console.error("[CLÉ PARIS] Unexpected error in fetchActiveProducts:", e);
     return staticGetActiveProducts();
   }
 }

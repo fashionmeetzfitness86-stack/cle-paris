@@ -10,18 +10,26 @@ import type { Product } from "../types";
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let alive = true;
+    setError(false);
     fetchActiveProducts()
-      .then((p) => alive && setProducts(p))
+      .then((p) => {
+        if (!alive) return;
+        setProducts(p);
+        // If fetch returned empty AND Supabase is configured, treat as error
+        if (p.length === 0) setError(false); // empty is valid (no products in DB)
+      })
+      .catch(() => alive && setError(true))
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;
     };
   }, []);
 
-  return { products, loading };
+  return { products, loading, error };
 }
 
 /** A single product by slug. */

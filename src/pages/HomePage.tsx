@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProducts } from "../hooks/useProducts";
-import { useScrollReveal, useRevealRef } from "../hooks/useScrollReveal";
+import { useScrollReveal } from "../hooks/useScrollReveal";
 import type { Lang } from "../types";
 
 // ── Marquee trust bar items (i18n keys) ──────────────────────────
@@ -22,10 +22,8 @@ export default function HomePage() {
   const featured = products[0];
   const TRUST_ITEMS = TRUST_KEYS.map((k) => t(k));
 
-  // Scroll-reveal refs
-  const featuredRef   = useScrollReveal();
-  const editorialRef  = useRevealRef();
-  const manifeRef     = useRevealRef();
+  // Scroll-reveal ref for featured section (section wrapper only)
+  const featuredRef = useScrollReveal();
 
   return (
     <div className="bg-[#F4EFE8] text-[#111]">
@@ -110,7 +108,7 @@ export default function HomePage() {
         ref={featuredRef}
         className="mx-auto max-w-7xl px-6 py-24"
       >
-        <div className="mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between reveal">
+        <div className="mb-12 flex flex-col gap-2 md:flex-row md:items-end md:justify-between animate-fade-up">
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-[#C8A97E]">
               {t("home.atelierEyebrow")}
@@ -130,18 +128,18 @@ export default function HomePage() {
         <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           {products.slice(0, 3).map((p, i) => {
             const color = p.colors[0];
-            const stagger = ["stagger-1", "stagger-2", "stagger-3"][i];
             return (
               <Link
                 key={p.slug}
                 to={`/product/${p.slug}`}
-                className={`group block reveal ${stagger}`}
+                className="group block animate-fade-up"
+                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
               >
                 <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-shadow duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                   <img
                     src={p.images[0]}
                     alt={p.name}
-                    loading="lazy"
+                    loading={i === 0 ? "eager" : "lazy"}
                     className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   {p.images[1] && (
@@ -182,8 +180,7 @@ export default function HomePage() {
         className="bg-[#EFE7DD]"
       >
         <div
-          ref={editorialRef as React.RefObject<HTMLDivElement>}
-          className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2 md:items-center reveal"
+          className="mx-auto grid max-w-7xl gap-12 px-6 py-24 md:grid-cols-2 md:items-center animate-fade-up"
         >
           <div className="overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.08)]">
             <img
@@ -226,8 +223,7 @@ export default function HomePage() {
       {/* ── MANIFESTE ──────────────────────────────────────────────── */}
       <section className="bg-[#E7DDD1]">
         <div
-          ref={manifeRef as React.RefObject<HTMLDivElement>}
-          className="mx-auto max-w-3xl px-6 py-24 text-center reveal"
+          className="mx-auto max-w-3xl px-6 py-24 text-center animate-fade-up"
         >
           <div className="text-[10px] uppercase tracking-[0.3em] text-[#C8A97E]">
             {t("home.manifestoEyebrow")}

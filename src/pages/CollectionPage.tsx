@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProducts } from "../hooks/useProducts";
-import { useScrollReveal } from "../hooks/useScrollReveal";
 import type { Lang, Product } from "../types";
 
 type Filter = "all" | "tops" | "pants" | "shorts" | "accessories";
@@ -44,10 +43,8 @@ export default function CollectionPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as Lang;
   const [filter, setFilter] = useState<Filter>("all");
-  const { products: allProducts, loading } = useProducts();
+  const { products: allProducts, loading, error } = useProducts();
   const products = allProducts.filter((p) => matchFilter(p, filter));
-
-  const gridRef = useScrollReveal();
 
   return (
     <div className="min-h-screen bg-[#F4EFE8]">
@@ -82,36 +79,38 @@ export default function CollectionPage() {
           ))}
         </div>
 
-        {/* Product grid — loading skeleton or scroll-reveal container */}
-        {loading ? (
+        {/* Error state */}
+        {error && (
+          <div className="py-24 text-center text-[#6F6F6F]">
+            <p>{t("collection.error") || "Error loading products"}</p>
+          </div>
+        )}
+
+        {/* Product grid — skeleton while loading, then real cards */}
+        {!error && (loading ? (
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <ProductSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div
-            ref={gridRef}
-            className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((p, i) => {
               const color = p.colors[0];
-              const staggerClass = `stagger-${Math.min(i + 1, 9)}` as string;
               return (
                 <Link
                   key={p.slug}
                   to={`/product/${p.slug}`}
-                  className={`group block reveal ${staggerClass}`}
+                  className="group block animate-fade-up"
+                  style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
                 >
-                  {/* Image container */}
                   <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                     <img
                       src={p.images[0]}
                       alt={p.name}
-                      loading="lazy"
+                      loading={i < 4 ? "eager" : "lazy"}
                       className="aspect-[4/5] w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    {/* Secondary image crossfade */}
                     {p.images[1] && (
                       <img
                         src={p.images[1]}
@@ -120,21 +119,17 @@ export default function CollectionPage() {
                         className="absolute inset-0 aspect-[4/5] w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                       />
                     )}
-                    {/* New badge — only when product is explicitly marked new */}
                     {p.isNew && (
                       <span className="absolute left-3 top-3 bg-[#C8A97E] px-2.5 py-1 text-[9px] uppercase tracking-[0.15em] text-white font-medium">
                         {t("home.new")}
                       </span>
                     )}
-                    {/* Quick-view hover overlay */}
                     <div className="absolute inset-x-0 bottom-0 translate-y-full bg-[#FAF7F2]/95 backdrop-blur-sm px-4 py-3 transition-transform duration-300 group-hover:translate-y-0 border-t border-black/8">
                       <span className="block text-center text-[10px] uppercase tracking-[0.2em] text-[#3A3A3A]">
                         {t("collection.viewProduct")}
                       </span>
                     </div>
                   </div>
-
-                  {/* Product info */}
                   <div className="mt-4 flex items-start justify-between gap-4">
                     <div>
                       <div className="text-sm font-medium text-[#111] group-hover:text-[#C8A97E] transition-colors duration-300">
@@ -152,10 +147,10 @@ export default function CollectionPage() {
               );
             })}
           </div>
-        )}
+        ))}
 
         {/* Empty state */}
-        {!loading && products.length === 0 && (
+        {!loading && !error && products.length === 0 && (
           <div className="py-24 text-center text-[#6F6F6F] animate-fade-up">
             <p className="text-sm">{t("collection.empty")}</p>
             <button
