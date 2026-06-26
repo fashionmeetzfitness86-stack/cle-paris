@@ -17,6 +17,7 @@
  */
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { requireOrigin } from "./_cors.js";
 
 export const config = { path: "/.netlify/functions/stripe-webhook" };
 
@@ -28,6 +29,11 @@ interface CartLine {
 }
 
 export default async (req: Request) => {
+  // CORS preflight — Stripe itself is server-to-server but allow preflight from browsers
+  // (e.g. Stripe's webhook tester UI). Unauthorized origins are blocked.
+  const corsResponse = requireOrigin(req);
+  if (corsResponse) return corsResponse;
+
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -111,7 +117,17 @@ export default async (req: Request) => {
   // Resolve cart lines from metadata, enrich with authoritative product data.
   let cart: CartLine[] = [];
   try {
-    cart = JSON.parse(session.metadata?.cart ?? "[]");
+    const rawCart = session.metadata?.cart ?? "[]";
+    const fmt = session.metadata?.cart_fmt;
+    const parsed = JSON.parse(rawCart);
+    if (fmt === "compact" && Array.isArray(parsed)) {
+      // Compact format: [[slug, size, color, qty], ...]
+      cart = (parsed as [string, string, string, number][]).map(
+        ([slug, size, color, qty]) => ({ slug, size, color, qty })
+      );
+    } else {
+      cart = parsed as CartLine[];
+    }
   } catch {
     cart = [];
   }

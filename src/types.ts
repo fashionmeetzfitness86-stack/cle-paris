@@ -24,6 +24,8 @@ export type Product = {
   variants: ProductVariant[];
   images: string[];
   archived?: boolean;
+  /** True when the product is explicitly flagged as new in the admin. */
+  isNew?: boolean;
 };
 
 export type CartItem = {

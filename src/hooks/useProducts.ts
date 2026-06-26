@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   fetchActiveProducts,
   fetchProductBySlug,
@@ -66,11 +66,17 @@ export function useArchivedProducts() {
 }
 
 /**
+ * Canonical size display order for the product page size picker.
+ */
+export const SIZE_ORDER: ReadonlyArray<string> = ["XS", "S", "M", "L", "XL", "XXL"];
+
+/**
  * A slug → Product lookup map built from active products.
  * Used by the cart to resolve names/prices/images for cart line items.
+ * Memoized so the Map is only rebuilt when products change.
  */
 export function useProductMap() {
   const { products, loading } = useProducts();
-  const map = new Map(products.map((p) => [p.slug, p]));
+  const map = useMemo(() => new Map(products.map((p) => [p.slug, p])), [products]);
   return { map, loading };
 }
