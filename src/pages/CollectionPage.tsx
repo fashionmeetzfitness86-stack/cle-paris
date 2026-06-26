@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProducts } from "../hooks/useProducts";
@@ -45,6 +45,19 @@ export default function CollectionPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const { products: allProducts, loading, error } = useProducts();
   const products = allProducts.filter((p) => matchFilter(p, filter));
+
+  // Safety net: force all cards visible after animations should have completed.
+  // Ensures products are never permanently hidden if animation fails to run
+  // (e.g. slow CSS parse, GPU compositing issue, prefers-reduced-motion).
+  const [animsComplete, setAnimsComplete] = useState(false);
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+    setAnimsComplete(false); // reset on filter change
+    // Last card starts at (n-1)*60ms; animation is 700ms; +200ms buffer
+    const ms = (products.length - 1) * 60 + 700 + 200;
+    const t = setTimeout(() => setAnimsComplete(true), ms);
+    return () => clearTimeout(t);
+  }, [loading, products.length, filter]);
 
   return (
     <div className="min-h-screen bg-[#F4EFE8]">
@@ -102,7 +115,12 @@ export default function CollectionPage() {
                   key={p.slug}
                   to={`/product/${p.slug}`}
                   className="group block animate-fade-up"
-                  style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+                  style={{
+                    animationDelay: `${i * 60}ms`,
+                    animationFillMode: "both",
+                    // Safeguard: if animation didn't run, products are still visible
+                    opacity: animsComplete ? 1 : undefined,
+                  }}
                 >
                   <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                     <img

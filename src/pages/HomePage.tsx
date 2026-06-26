@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProducts } from "../hooks/useProducts";
@@ -24,6 +25,15 @@ export default function HomePage() {
 
   // Scroll-reveal ref for featured section (section wrapper only)
   const featuredRef = useScrollReveal();
+
+  // Safety net: force featured cards visible after animations complete
+  const [featuredAnimsComplete, setFeaturedAnimsComplete] = useState(false);
+  useEffect(() => {
+    if (products.length === 0) return;
+    // 3 cards × 80ms stagger + 700ms animation + 200ms buffer = 1060ms
+    const t = setTimeout(() => setFeaturedAnimsComplete(true), 2 * 80 + 700 + 200);
+    return () => clearTimeout(t);
+  }, [products.length]);
 
   return (
     <div className="bg-[#F4EFE8] text-[#111]">
@@ -133,7 +143,11 @@ export default function HomePage() {
                 key={p.slug}
                 to={`/product/${p.slug}`}
                 className="group block animate-fade-up"
-                style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+                style={{
+                  animationDelay: `${i * 80}ms`,
+                  animationFillMode: "both",
+                  opacity: featuredAnimsComplete ? 1 : undefined,
+                }}
               >
                 <div className="relative overflow-hidden bg-[#EFE7DD] shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-shadow duration-500 group-hover:shadow-[0_8px_40px_rgba(0,0,0,0.10)]">
                   <img
